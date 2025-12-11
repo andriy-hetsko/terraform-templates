@@ -7,10 +7,6 @@ on:
         description: "Enter destroy password"
         required: true
         type: string
-      bucket_name:
-        description: "Terraform Backend S3 Bucket"
-        required: true
-        type: string
       aws_region:
         description: "AWS Region"
         required: true
