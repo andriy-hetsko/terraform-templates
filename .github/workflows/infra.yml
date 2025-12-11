@@ -85,9 +85,9 @@ jobs:
             -backend-config="encrypt=true"
 
       - name: Terraform Plan
-        working-directory: terraform/main
+        working-directory: ./micro-project/main
         run: terraform plan -out=tfplan
 
       - name: Terraform Apply
-        working-directory: terraform/main
+        working-directory: ./micro-project/main
         run: terraform apply -auto-approve tfplan
