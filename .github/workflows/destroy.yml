@@ -29,7 +29,6 @@ jobs:
     env:
       INPUT_PASSWORD:     ${{ inputs.password }}
       DESTROY_PASSWORD:   ${{ secrets.DESTROY_PASSWORD }}
-      BUCKET_NAME:        ${{ inputs.bucket_name }}
       AWS_REGION:         ${{ inputs.aws_region }}
       ENVIRONMENT:        ${{ inputs.environment }}
 
