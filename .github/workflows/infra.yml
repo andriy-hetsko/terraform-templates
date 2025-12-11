@@ -63,7 +63,7 @@ jobs:
 
       - name: Create backend bucket IF NOT EXISTS
         if: steps.check_bucket.outputs.exists == 'false'
-        working-directory: terraform/backend
+        working-directory: micro-project/backend
         run: |
           echo "backend_bucket_name = \"${BUCKET_NAME}\"" > backend.auto.tfvars
           echo "aws_region = \"${AWS_REGION}\"" >> backend.auto.tfvars
@@ -75,7 +75,8 @@ jobs:
       # 4. INIT + DEPLOY MAIN INFRA WITH BACKEND
       # -------------------------------------------
       - name: Terraform Init (with backend config)
-        working-directory: terraform/main
+        working-directory: micro-project/main
+
         run: |
           terraform init \
             -backend-config="bucket=${BUCKET_NAME}" \
