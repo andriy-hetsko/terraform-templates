@@ -8,7 +8,7 @@ resource "aws_lb" "this" {
   tags = {
     Project     = var.project_name
     Environment = var.environment
-    Managed = "teraform"
+    Managed = "terraform"
   }
 }
 
@@ -33,7 +33,7 @@ resource "aws_lb_target_group" "this" {
   tags = {
     Project     = var.project_name
     Environment = var.environment
-    Managed = terraform
+    Managed = "terraform"
   }
 }
 
