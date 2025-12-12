@@ -58,6 +58,8 @@ jobs:
       PUBLIC_SUBNETS: ${{ inputs.public_subnets }}
       PRIVATE_SUBNETS: ${{ inputs.private_subnets }}
 
+      APP_PORT:     ${{ inputs.app_port }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -116,7 +118,11 @@ jobs:
             "cidr": "${CIDR}",
             "azs": ${AZS},
             "public_subnets": ${PUBLIC_SUBNETS},
-            "private_subnets": ${PRIVATE_SUBNETS}
+            "private_subnets": ${PRIVATE_SUBNETS}, 
+            "app_port": ${APP_PORT}, 
+            "aws_region": ${AWS_REGION}, 
+            "backend_bucket": "${PROJECT_NAME}-backend-tf"
+
           }
           EOF
       - name: Upload tfvars to S3
