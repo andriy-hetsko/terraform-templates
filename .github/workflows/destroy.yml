@@ -61,13 +61,24 @@ jobs:
 # -------------------------------------------
 #  INIT + DESYTROY ECS
 # -------------------------------------------
+            - name: Check if ECS state exists
+              id: ecs_state
+              run: |
+                if aws s3 ls s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/ecs/terraform.tfstate >/dev/null 2>&1; then
+                    echo "exists=true" >> $GITHUB_OUTPUT
+                else
+                    echo "exists=false" >> $GITHUB_OUTPUT
+                fi
+
             - name: Download tfvars from S3
+              if: steps.ecs_state.outputs.exists == 'true'
               working-directory: ./micro-project/ecs
               run: |
                 aws s3 cp \
                     s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json \
                     terraform.auto.tfvars.json
             - name: Terraform Init ECS (with backend config)
+              if: steps.ecs_state.outputs.exists == 'true'
               working-directory: ./micro-project/ecs
               run: |
                 terraform init \
@@ -77,6 +88,7 @@ jobs:
                     -backend-config="encrypt=true"
 
             - name: Terraform Destroy ECS
+              if: steps.ecs_state.outputs.exists == 'true'
               working-directory: ./micro-project/ecs
               run: terraform destroy -auto-approve 
 
