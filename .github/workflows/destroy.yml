@@ -90,13 +90,13 @@ jobs:
               working-directory: ./micro-project/vpc
               run: |
                 aws s3 cp \
-                    s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json \
+                    s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json \
                     terraform.auto.tfvars.json
             - name: Terraform Init (with backend config)
               working-directory: ./micro-project/vpc
               run: |
                 terraform init \
-                    -backend-config="bucket=$BUCKET_NAME_BACKEND" \
+                    -backend-config="bucket=${BUCKET_NAME_BACKEN}" \
                     -backend-config="key=${ENVIRONMENT}/vpc/terraform.tfstate" \
                     -backend-config="region=${AWS_REGION}" \
                     -backend-config="encrypt=true"
