@@ -22,24 +22,27 @@ on:
         required: true
         type: string
         default: "10.0.0.0/16"
-
       azs:
         description: "Availability Zones (JSON array)"
         required: true
         type: string
         default: '["us-east-1a","us-east-1b","us-east-1c"]'
-
       public_subnets:
         description: "Public subnets CIDRs (JSON array)"
         required: true
         type: string
         default: '["10.0.1.0/24","10.0.2.0/24","10.0.3.0/24"]'
-
       private_subnets:
         description: "Private subnets CIDRs (JSON array)"
         required: true
         type: string
         default: '["10.0.11.0/24","10.0.12.0/24","10.0.13.0/24"]'
+      app_port:
+        description: "Application port exposed by ECS service"
+        required: false
+        default: "3000"
+        type: string
+
 
 jobs:
   infra:
@@ -146,4 +149,32 @@ jobs:
         run: terraform plan -input=false -out=tfplan
       - name: Terraform Apply
         working-directory: ./micro-project/vpc
+        run: terraform apply -auto-approve tfplan
+
+# -------------------------------------------
+#  INIT + DEPLOY SG
+# -------------------------------------------
+
+      - name: Download tfvars from S3
+        working-directory: ./micro-project/security-group
+        run: |
+          aws s3 cp \
+            s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json \
+            terraform.auto.tfvars.json
+
+      - name: Terraform Init (with backend config)
+        working-directory: ./micro-project/security-group
+
+        run: |
+          terraform init \
+            -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+            -backend-config="key=${ENVIRONMENT}/security-group/terraform.tfstate" \
+            -backend-config="region=${AWS_REGION}" \
+            -backend-config="encrypt=true"
+
+      - name: Terraform Plan
+        working-directory: ./micro-project/security-group
+        run: terraform plan -input=false -out=tfplan
+      - name: Terraform Apply
+        working-directory: ./micro-project/security-group
         run: terraform apply -auto-approve tfplan
