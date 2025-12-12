@@ -59,9 +59,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ------------------------
-      # 1. AWS Credentials
-      # ------------------------
+  # ------------------------
+  #  AWS Credentials
+  # ------------------------
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -69,17 +69,17 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # ------------------------
-      # 2. Install Terraform
-      # ------------------------
+# ------------------------
+# Install Terraform
+# ------------------------
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.6.6"
 
-      # -------------------------------------------
-      # 3. BOOTSTRAP BACKEND IF BUCKET DOES NOT EXIST
-      # -------------------------------------------
+# -------------------------------------------
+# BOOTSTRAP BACKEND IF BUCKET DOES NOT EXIST
+# -------------------------------------------
       - name: Check if bucket exists
         id: check_bucket
         run: |
@@ -99,9 +99,38 @@ jobs:
           terraform init
           terraform apply -auto-approve
 
-      # -------------------------------------------
-      # 4. INIT + DEPLOY VPC
-      # -------------------------------------------
+
+  # -----------------------------------------------
+  #  Generate terraform.tfvars.json and send to S3
+  # -----------------------------------------------
+      - name: Generate terraform.tfvars.json
+        run: |
+          cat > terraform.tfvars.json <<EOF
+          {
+            "project_name": "${PROJECT_NAME}",
+            "environment": "${ENVIRONMENT}",
+            "prefix": "${PROJECT_NAME}",
+            "cidr": "${CIDR}",
+            "azs": ${AZS},
+            "public_subnets": ${PUBLIC_SUBNETS},
+            "private_subnets": ${PRIVATE_SUBNETS}
+          }
+          EOF
+      - name: Upload tfvars to S3
+        run: |
+          aws s3 cp terraform.tfvars.json \
+            s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json
+
+# -------------------------------------------
+#  INIT + DEPLOY VPC
+# -------------------------------------------
+      - name: Download tfvars from S3
+        working-directory: ./micro-project/vpc
+        run: |
+          aws s3 cp \
+            s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json \
+            terraform.auto.tfvars.json
+
       - name: Terraform Init (with backend config)
         working-directory: ./micro-project/vpc
 
@@ -114,16 +143,7 @@ jobs:
 
       - name: Terraform Plan
         working-directory: ./micro-project/vpc
-        run: |
-         terraform plan -out=tfplan \
-            -var="project_name=${PROJECT_NAME}" \
-            -var="environment=${ENVIRONMENT}" \
-            -var="prefix=${PROJECT_NAME}" \
-            -var="cidr=${CIDR}" \
-            -var="azs=${AZS}" \
-            -var="public_subnets=${PUBLIC_SUBNETS}" \
-            -var="private_subnets=${PRIVATE_SUBNETS}" \
-            -out=tfplan
+        run: terraform plan -input=false -out=tfplan
       - name: Terraform Apply
         working-directory: ./micro-project/vpc
         run: terraform apply -auto-approve tfplan
