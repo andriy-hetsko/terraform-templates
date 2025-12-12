@@ -164,7 +164,7 @@ jobs:
             "target_port": "${TARGET_PORT}",
             "healthcheck_path": "${HEALTHCHECK_PATH}", 
             "container_image": "${CONTAINER_IMAGE}",
-            "container_port": ${CONTAINER_PORT},
+            "container_port": "${CONTAINER_PORT}",
             "cpu": ${CPU},
             "memory": ${MEMORY},
             "desired_count": ${DESIRED_COUNT},
