@@ -115,7 +115,7 @@ jobs:
       - name: Terraform Plan
         working-directory: ./micro-project/vpc
         run: |
-         terraform plan -out=tfplan
+         terraform plan -out=tfplan \
             -var="project_name=${PROJECT_NAME}" \
             -var="environment=${ENVIRONMENT}" \
             -var="prefix=${PROJECT_NAME}" \
