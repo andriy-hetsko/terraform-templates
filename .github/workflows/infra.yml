@@ -124,6 +124,6 @@ jobs:
             -var="public_subnets=${PUBLIC_SUBNETS}" \
             -var="private_subnets=${PRIVATE_SUBNETS}" \
             -out=tfplan
-      # - name: Terraform Apply
-      #   working-directory: ./micro-project/vpc
-      #   run: terraform apply -auto-approve tfplan
+      - name: Terraform Apply
+        working-directory: ./micro-project/vpc
+        run: terraform apply -auto-approve tfplan
