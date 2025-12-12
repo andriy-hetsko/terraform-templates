@@ -89,7 +89,7 @@ jobs:
               working-directory: ./micro-project/vpc
               run: |
                 terraform init \
-                    -backend-config="bucket=${PROJECT_NAME}" \
+                    -backend-config="bucket=$BUCKET_NAME_BACKEND" \
                     -backend-config="key=${ENVIRONMENT}/vpc/terraform.tfstate" \
                     -backend-config="region=${AWS_REGION}" \
                     -backend-config="encrypt=true"
