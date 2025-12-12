@@ -83,7 +83,7 @@ jobs:
       - name: Check if bucket exists
         id: check_bucket
         run: |
-          if aws s3api head-bucket --bucket "$PROJECT_NAME" 2>/dev/null; then
+          if aws s3api head-bucket --bucket "$PROJECT_NAME-backend-tf" 2>/dev/null; then
             echo "exists=true" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT
@@ -93,7 +93,7 @@ jobs:
         if: steps.check_bucket.outputs.exists == 'false'
         working-directory: ./micro-project/backend
         run: |
-          echo "backend_bucket_name = \"${PROJECT_NAME}\"" > backend.auto.tfvars
+          echo "backend_bucket_name = \"${PROJECT_NAME}-backend-tf\"" > backend.auto.tfvars
           echo "aws_region = \"${AWS_REGION}\"" >> backend.auto.tfvars
 
           terraform init
@@ -107,7 +107,7 @@ jobs:
 
         run: |
           terraform init \
-            -backend-config="bucket=${PROJECT_NAME}" \
+            -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
             -backend-config="key=${ENVIRONMENT}/vpc/terraform.tfstate" \
             -backend-config="region=${AWS_REGION}" \
             -backend-config="encrypt=true"
@@ -124,6 +124,6 @@ jobs:
             -var="public_subnets=${PUBLIC_SUBNETS}" \
             -var="private_subnets=${PRIVATE_SUBNETS}" \
             -out=tfplan
-      - name: Terraform Apply
-        working-directory: ./micro-project/vpc
-        run: terraform apply -auto-approve tfplan
+      # - name: Terraform Apply
+      #   working-directory: ./micro-project/vpc
+      #   run: terraform apply -auto-approve tfplan
