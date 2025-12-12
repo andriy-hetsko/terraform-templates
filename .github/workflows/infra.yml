@@ -43,6 +43,7 @@ on:
         required: false
         default: "3000"
         type: string
+
       listener_port:
         required: false
         default: "80"
@@ -53,16 +54,31 @@ on:
         required: false
         default: "/health"
 
+      compute_type:
+        type: choice
+        options: [ecs, ec2]
+      container_image:
+        required: true
+      cpu:
+        default: "256"
+      memory:
+        default: "512"
+      desired_count:
+        default: "1"
+      enable_exec:
+        default: "true"
+
 
 jobs:
   infra:
     runs-on: ubuntu-latest
 
     env:
+
       PROJECT_NAME: ${{ inputs.project_name }}
       AWS_REGION: ${{ inputs.aws_region }}
       ENVIRONMENT: ${{ inputs.environment }}
-
+      
       CIDR: ${{ inputs.cidr }}
       AZS: ${{ inputs.azs }}
       PUBLIC_SUBNETS: ${{ inputs.public_subnets }}
@@ -73,6 +89,14 @@ jobs:
       LISTENER_PORT: ${{ inputs.listener_port}}
       TARGET_PORT: ${{ inputs.target_port}}
       HEALTHCHECK_PATH: ${{ inputs.healthcheck_path}}
+
+      CONTAINER_IMAGE: ${{ inputs.container_image }}
+      CONTAINER_PORT:  ${{ inputs.container_port }}
+      CPU:             ${{ inputs.cpu }}
+      MEMORY:          ${{ inputs.memory }}
+      DESIRED_COUNT:   ${{ inputs.desired_count }}
+      ENABLE_EXEC:     ${{ inputs.enable_exec }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -137,7 +161,13 @@ jobs:
             "backend_bucket": "${PROJECT_NAME}-backend-tf", 
             "listener_port": "${LISTENER_PORT}",
             "target_port": "${TARGET_PORT}",
-            "healthcheck_path": "${HEALTHCHECK_PATH}"
+            "healthcheck_path": "${HEALTHCHECK_PATH}", 
+            "container_image": "${CONTAINER_IMAGE}",
+            "container_port": ${CONTAINER_PORT},
+            "cpu": ${CPU},
+            "memory": ${MEMORY},
+            "desired_count": ${DESIRED_COUNT},
+            "enable_exec": ${ENABLE_EXEC}
           }
           EOF
 
@@ -227,4 +257,31 @@ jobs:
         run: terraform plan -input=false -out=tfplan
       - name: Terraform Apply ALB
         working-directory: ./micro-project/alb
+        run: terraform apply -auto-approve tfplan
+
+# -------------------------------------------
+#  INIT + DEPLOY ECS
+# -------------------------------------------
+      - name: Download tfvars from S3
+        working-directory: ./micro-project/ecs
+        run: |
+          aws s3 cp \
+            s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json \
+            terraform.auto.tfvars.json
+
+      - name: Terraform Init ECS (with backend config)
+        working-directory: ./micro-project/ecs
+
+        run: |
+          terraform init \
+            -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+            -backend-config="key=${ENVIRONMENT}/ecs/terraform.tfstate" \
+            -backend-config="region=${AWS_REGION}" \
+            -backend-config="encrypt=true"
+
+      - name: Terraform Plan ECS
+        working-directory: ./micro-project/ecs
+        run: terraform plan -input=false -out=tfplan
+      - name: Terraform Apply ECS
+        working-directory: ./micro-project/ecs
         run: terraform apply -auto-approve tfplan
