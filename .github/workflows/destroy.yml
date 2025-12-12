@@ -83,7 +83,15 @@ jobs:
               uses: hashicorp/setup-terraform@v3
               with:
                   terraform_version: "1.6.6"
-
+# -------------------------------------------
+#  INIT + DESYTROY VPC
+# -------------------------------------------
+            - name: Download tfvars from S3
+              working-directory: ./micro-project/vpc
+              run: |
+                aws s3 cp \
+                    s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json \
+                    terraform.auto.tfvars.json
             - name: Terraform Init (with backend config)
               working-directory: ./micro-project/vpc
               run: |
@@ -95,12 +103,4 @@ jobs:
 
             - name: Terraform Destroy
               working-directory: ./micro-project/vpc
-              run: |
-                terraform destroy -auto-approve \
-                    -var="project_name=${PROJECT_NAME}" \
-                    -var="environment=${ENVIRONMENT}" \
-                    -var="prefix=${PROJECT_NAME}" \
-                    -var="cidr=${CIDR}" \
-                    -var="azs=${AZS}" \
-                    -var="public_subnets=${PUBLIC_SUBNETS}" \
-                    -var="private_subnets=${PRIVATE_SUBNETS}" 
+              run: terraform destroy -auto-approve 
