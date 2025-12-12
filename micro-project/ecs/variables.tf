@@ -14,7 +14,6 @@ variable "aws_region"     {
 
 variable "container_image" {
      type = string 
-     default = "nginx:1.25-alpine"
      }
 variable "container_port"  {
      type = number 

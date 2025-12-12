@@ -59,6 +59,7 @@ on:
         options: [ecs, ec2]
       container_image:
         required: true
+        default: "nginx:1.25-alpine"
       cpu:
         default: "256"
       memory:
