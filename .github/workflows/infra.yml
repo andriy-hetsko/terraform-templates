@@ -81,7 +81,7 @@ jobs:
         run: |
           terraform init \
             -backend-config="bucket=${PROJECT_NAME}" \
-            -backend-config="key=buckets/${PROJECT_NAME}/${ENVIRONMENT}/test-service/terraform.tfstate" \
+            -backend-config="key=${ENVIRONMENT}/test-service/terraform.tfstate" \
             -backend-config="region=${AWS_REGION}" \
             -backend-config="encrypt=true"
 
