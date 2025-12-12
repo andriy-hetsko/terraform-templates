@@ -22,6 +22,29 @@ on:
                 default: "dev"
                 type: string
 
+            cidr:
+                description: "VPC CIDR block"
+                required: true
+                type: string
+                default: "10.0.0.0/16"
+
+            azs:
+                description: "Availability Zones (JSON array)"
+                required: true
+                type: string
+                default: '["us-east-1a","us-east-1b","us-east-1c"]'
+
+            public_subnets:
+                description: "Public subnets CIDRs (JSON array)"
+                required: true
+                type: string
+                default: '["10.0.1.0/24","10.0.2.0/24","10.0.3.0/24"]'
+
+            private_subnets:
+                description: "Private subnets CIDRs (JSON array)"
+                required: true
+                type: string
+                default: '["10.0.11.0/24","10.0.12.0/24","10.0.13.0/24"]'
 jobs:
     destroy:
         runs-on: ubuntu-latest
@@ -32,6 +55,11 @@ jobs:
             BUCKET_NAME_BACKEND: ${{ inputs.bucket_name }}
             AWS_REGION: ${{ inputs.aws_region }}
             ENVIRONMENT: ${{ inputs.environment }}
+
+            CIDR: ${{ inputs.cidr }}
+            AZS: ${{ inputs.azs }}
+            PUBLIC_SUBNETS: ${{ inputs.public_subnets }}
+            PRIVATE_SUBNETS: ${{ inputs.private_subnets }}
 
         steps:
             - name: Verify password
@@ -57,15 +85,15 @@ jobs:
               with:
                   terraform_version: "1.6.6"
 
-            - name: Terraform Init
-              working-directory: ./micro-project/main
+            - name: Terraform Init (with backend config)
+              working-directory: ./micro-project/vpc
               run: |
-                  terraform init \
-                    -backend-config="bucket=${BUCKET_NAME_BACKEND}" \
-                    -backend-config="key=${ENVIRONMENT}/terraform.tfstate" \
+                terraform init \
+                    -backend-config="bucket=${PROJECT_NAME}" \
+                    -backend-config="key=${ENVIRONMENT}/vpc/terraform.tfstate" \
                     -backend-config="region=${AWS_REGION}" \
                     -backend-config="encrypt=true"
 
             - name: Terraform Destroy
-              working-directory: ./micro-project/main
+              working-directory: ./micro-project/vpc
               run: terraform destroy -auto-approve
