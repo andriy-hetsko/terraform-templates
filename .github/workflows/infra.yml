@@ -6,11 +6,12 @@ on:
       project_name:
         description: "Project name"
         required: true
+        default: "hetsko"
         type: string
       aws_region:
         description: "AWS Region"
         required: true
-        default: "us-east-1"
+        default: "us-east-2"
         type: string
       environment:
         description: "Environment (dev/stage/prod)"
@@ -26,7 +27,7 @@ on:
         description: "Availability Zones (JSON array)"
         required: true
         type: string
-        default: '["us-east-1a","us-east-1b","us-east-1c"]'
+        default: '["us-east-2a","us-east-2b","us-east-2c"]'
       public_subnets:
         description: "Public subnets CIDRs (JSON array)"
         required: true
