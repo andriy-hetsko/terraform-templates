@@ -134,7 +134,7 @@ jobs:
             s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json \
             terraform.auto.tfvars.json
 
-      - name: Terraform Init (with backend config)
+      - name: Terraform Init VPC (with backend config)
         working-directory: ./micro-project/vpc
 
         run: |
@@ -144,10 +144,10 @@ jobs:
             -backend-config="region=${AWS_REGION}" \
             -backend-config="encrypt=true"
 
-      - name: Terraform Plan
+      - name: Terraform Plan VPC
         working-directory: ./micro-project/vpc
         run: terraform plan -input=false -out=tfplan
-      - name: Terraform Apply
+      - name: Terraform Apply VPC
         working-directory: ./micro-project/vpc
         run: terraform apply -auto-approve tfplan
 
@@ -162,7 +162,7 @@ jobs:
             s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json \
             terraform.auto.tfvars.json
 
-      - name: Terraform Init (with backend config)
+      - name: Terraform Init SG (with backend config)
         working-directory: ./micro-project/security-group
 
         run: |
@@ -172,9 +172,9 @@ jobs:
             -backend-config="region=${AWS_REGION}" \
             -backend-config="encrypt=true"
 
-      - name: Terraform Plan
+      - name: Terraform Plan SG
         working-directory: ./micro-project/security-group
         run: terraform plan -input=false -out=tfplan
-      - name: Terraform Apply
+      - name: Terraform Apply SG
         working-directory: ./micro-project/security-group
         run: terraform apply -auto-approve tfplan
