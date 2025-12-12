@@ -116,9 +116,9 @@ jobs:
             "environment": "${ENVIRONMENT}",
             "prefix": "${PROJECT_NAME}",
             "cidr": "${CIDR}",
-            "azs": "${AZS}",
-            "public_subnets": "${PUBLIC_SUBNETS}",
-            "private_subnets": "${PRIVATE_SUBNETS}", 
+            "azs": ${AZS},
+            "public_subnets": ${PUBLIC_SUBNETS},
+            "private_subnets": ${PRIVATE_SUBNETS}, 
             "app_port": "${APP_PORT}", 
             "aws_region": "${AWS_REGION}", 
             "backend_bucket": "${PROJECT_NAME}-backend-tf"
