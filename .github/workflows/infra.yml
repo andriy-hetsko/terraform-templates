@@ -17,10 +17,7 @@ on:
         required: true
         default: "dev"
         type: string
-      service:
-        description: "Service name (vpc/ecs/alb/db/etc)"
-        required: true
-        type: string
+
 
 jobs:
   infra:
@@ -30,7 +27,6 @@ jobs:
       PROJECT_NAME:  ${{ inputs.project_name }}
       AWS_REGION:   ${{ inputs.aws_region }}
       ENVIRONMENT:  ${{ inputs.environment }}
-      SERVICE:      ${{ inputs.service }}
 
     steps:
       - name: Checkout
@@ -85,7 +81,7 @@ jobs:
         run: |
           terraform init \
             -backend-config="bucket=${PROJECT_NAME}" \
-            -backend-config="key=buckets/${PROJECT_NAME}/${ENVIRONMENT}/${SERVICE}/terraform.tfstate" \
+            -backend-config="key=buckets/${PROJECT_NAME}/${ENVIRONMENT}/test-service/terraform.tfstate" \
             -backend-config="region=${AWS_REGION}" \
             -backend-config="encrypt=true"
 
