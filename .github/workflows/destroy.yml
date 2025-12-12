@@ -59,7 +59,7 @@ jobs:
                   terraform_version: "1.6.6"
 
 # -------------------------------------------
-#  INIT + DESYTROY 
+#  INIT + DESYTROY ALB
 # -------------------------------------------
             - name: Download tfvars from S3
               working-directory: ./micro-project/alb
