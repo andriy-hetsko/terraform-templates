@@ -103,5 +103,4 @@ jobs:
                     -var="cidr=${CIDR}" \
                     -var="azs=${AZS}" \
                     -var="public_subnets=${PUBLIC_SUBNETS}" \
-                    -var="private_subnets=${PRIVATE_SUBNETS}" \
-                    -out=tfplan
+                    -var="private_subnets=${PRIVATE_SUBNETS}" 
