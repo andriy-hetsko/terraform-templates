@@ -264,6 +264,7 @@ jobs:
 #  INIT + DEPLOY ECS
 # -------------------------------------------
       - name: Download tfvars from S3
+        if: inputs.compute_type == 'ecs'
         working-directory: ./micro-project/ecs
         run: |
           aws s3 cp \
@@ -271,6 +272,7 @@ jobs:
             terraform.auto.tfvars.json
 
       - name: Terraform Init ECS (with backend config)
+        if: inputs.compute_type == 'ecs'
         working-directory: ./micro-project/ecs
 
         run: |
@@ -281,8 +283,10 @@ jobs:
             -backend-config="encrypt=true"
 
       - name: Terraform Plan ECS
+        if: inputs.compute_type == 'ecs'
         working-directory: ./micro-project/ecs
         run: terraform plan -input=false -out=tfplan
       - name: Terraform Apply ECS
+        if: inputs.compute_type == 'ecs'
         working-directory: ./micro-project/ecs
         run: terraform apply -auto-approve tfplan
