@@ -20,6 +20,7 @@ module "vpc" {
   tags = {
     Project     = var.project_name
     Environment = var.environment
+    Managed = terraform
   }
 }
 
