@@ -17,42 +17,74 @@ on:
         required: true
         default: "dev"
         type: string
+      prefix:
+        description: "VPC name prefix"
+        required: true
+        type: string
 
+      cidr:
+        description: "VPC CIDR block"
+        required: true
+        type: string
+        default: "10.0.0.0/16"
+
+      azs:
+        description: "Availability Zones (JSON array)"
+        required: true
+        type: string
+        default: '["us-east-1a","us-east-1b","us-east-1c"]'
+
+      public_subnets:
+        description: "Public subnets CIDRs (JSON array)"
+        required: true
+        type: string
+        default: '["10.0.1.0/24","10.0.2.0/24","10.0.3.0/24"]'
+
+      private_subnets:
+        description: "Private subnets CIDRs (JSON array)"
+        required: true
+        type: string
+        default: '["10.0.11.0/24","10.0.12.0/24","10.0.13.0/24"]'
 
 jobs:
   infra:
     runs-on: ubuntu-latest
 
     env:
-      PROJECT_NAME:  ${{ inputs.project_name }}
-      AWS_REGION:   ${{ inputs.aws_region }}
-      ENVIRONMENT:  ${{ inputs.environment }}
+      PROJECT_NAME: ${{ inputs.project_name }}
+      AWS_REGION: ${{ inputs.aws_region }}
+      ENVIRONMENT: ${{ inputs.environment }}
+      PREFIX: ${{ inputs.prefix }}
+      CIDR: ${{ inputs.cidr }}
+      AZS: ${{ inputs.azs }}
+      PUBLIC_SUBNETS: ${{ inputs.public_subnets }}
+      PRIVATE_SUBNETS: ${{ inputs.private_subnets }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-  # ------------------------
-  # 1. AWS Credentials
-  # ------------------------
+      # ------------------------
+      # 1. AWS Credentials
+      # ------------------------
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region:            ${{ env.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
-  # ------------------------
-  # 2. Install Terraform
-  # ------------------------
+      # ------------------------
+      # 2. Install Terraform
+      # ------------------------
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.6.6"
 
-  # -------------------------------------------
-  # 3. BOOTSTRAP BACKEND IF BUCKET DOES NOT EXIST
-  # -------------------------------------------
+      # -------------------------------------------
+      # 3. BOOTSTRAP BACKEND IF BUCKET DOES NOT EXIST
+      # -------------------------------------------
       - name: Check if bucket exists
         id: check_bucket
         run: |
@@ -72,23 +104,31 @@ jobs:
           terraform init
           terraform apply -auto-approve
 
-  # -------------------------------------------
-  # 4. INIT + DEPLOY MAIN INFRA WITH BACKEND
-  # -------------------------------------------
+      # -------------------------------------------
+      # 4. INIT + DEPLOY VPC
+      # -------------------------------------------
       - name: Terraform Init (with backend config)
-        working-directory: ./micro-project/main
+        working-directory: ./micro-project/vpC
 
         run: |
           terraform init \
             -backend-config="bucket=${PROJECT_NAME}" \
-            -backend-config="key=${ENVIRONMENT}/test-service/terraform.tfstate" \
+            -backend-config="key=${ENVIRONMENT}/vpc/terraform.tfstate" \
             -backend-config="region=${AWS_REGION}" \
             -backend-config="encrypt=true"
 
       - name: Terraform Plan
-        working-directory: ./micro-project/main
-        run: terraform plan -out=tfplan
-
+        working-directory: ./micro-project/vpc
+        run: |
+         terraform plan -out=tfplan
+            -var="project_name=${PROJECT_NAME}" \
+            -var="environment=${ENVIRONMENT}" \
+            -var="prefix=${PREFIX}" \
+            -var="cidr=${CIDR}" \
+            -var="azs=${AZS}" \
+            -var="public_subnets=${PUBLIC_SUBNETS}" \
+            -var="private_subnets=${PRIVATE_SUBNETS}" \
+            -out=tfplan
       - name: Terraform Apply
-        working-directory: ./micro-project/main
+        working-directory: ./micro-project/vpc
         run: terraform apply -auto-approve tfplan
