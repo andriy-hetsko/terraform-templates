@@ -108,7 +108,7 @@ jobs:
       # 4. INIT + DEPLOY VPC
       # -------------------------------------------
       - name: Terraform Init (with backend config)
-        working-directory: ./micro-project/vpC
+        working-directory: ./micro-project/vpc
 
         run: |
           terraform init \
