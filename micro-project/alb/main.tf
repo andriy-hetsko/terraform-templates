@@ -11,7 +11,7 @@ data "terraform_remote_state" "sg" {
   backend = "s3"
   config = {
     bucket = var.backend_bucket
-    key    = "${var.environment}/security-groups/terraform.tfstate"
+    key    = "${var.environment}/security-group/terraform.tfstate"
     region = var.aws_region
   }
 }
