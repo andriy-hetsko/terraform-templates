@@ -26,7 +26,7 @@ data "terraform_remote_state" "alb" {
 }
 
 module "ecs" {
-  source = "../../modules/ecs"
+  source = "../modules/ecs"
 
   project_name   = var.project_name
   environment    = var.environment
