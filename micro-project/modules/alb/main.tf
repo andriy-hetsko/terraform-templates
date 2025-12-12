@@ -8,7 +8,7 @@ resource "aws_lb" "this" {
   tags = {
     Project     = var.project_name
     Environment = var.environment
-    Managed = teraform
+    Managed = "teraform"
   }
 }
 
