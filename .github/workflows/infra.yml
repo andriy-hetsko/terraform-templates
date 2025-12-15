@@ -98,6 +98,8 @@ jobs:
       DESIRED_COUNT:   ${{ inputs.desired_count }}
       ENABLE_EXEC:     ${{ inputs.enable_exec }}
 
+      COMPUTE_TYPE: ${{ inputs.compute_type }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -178,7 +180,9 @@ jobs:
             "enable_secrets_manager": false,
             "enable_s3_read": false,
             "enable_cloudwatch_logs": false, 
-            "enable_ssm": true
+            "enable_ssm": true, 
+
+            "compute_type": ${COMPUTE_TYPE}
             
           }
           EOF
