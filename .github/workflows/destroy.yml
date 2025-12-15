@@ -216,7 +216,7 @@ jobs:
                 aws s3 cp \
                     s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json \
                     terraform.auto.tfvars.json
-            - name: Terraform Init VPN (with backend config)
+            - name: Terraform Init VPC (with backend config)
               working-directory: ./micro-project/vpc
               run: |
                 terraform init \
@@ -225,6 +225,6 @@ jobs:
                     -backend-config="region=${AWS_REGION}" \
                     -backend-config="encrypt=true"
 
-            - name: Terraform Destroy VPN
+            - name: Terraform Destroy VPC
               working-directory: ./micro-project/vpc
               run: terraform destroy -auto-approve 

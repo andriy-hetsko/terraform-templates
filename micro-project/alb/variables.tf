@@ -18,3 +18,7 @@ variable "healthcheck_path" {
   type    = string
   default = "/health"
 }
+
+variable "compute_type" {
+  type    = string
+}

@@ -11,11 +11,18 @@ variable "backend_bucket" {
 variable "aws_region"     {
      type = string 
      }
-     
+
 variable "instance_type" {
   default = "t3.micro"
 }
 
 variable "associate_public_ip" {
   default = false
+}
+
+variable "compute_type" {
+  type        = string
+}
+variable "target_port" {
+  type        = number 
 }

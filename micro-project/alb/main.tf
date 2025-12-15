@@ -1,3 +1,6 @@
+locals {
+  alb_target_type = var.compute_type == "ecs" ? "ip" : "instance"
+}
 data "terraform_remote_state" "vpc" {
   backend = "s3"
   config = {
@@ -28,4 +31,6 @@ module "alb" {
   listener_port     = var.listener_port
   target_port       = var.target_port
   healthcheck_path  = var.healthcheck_path
+
+  target_type = local.alb_target_type
 }

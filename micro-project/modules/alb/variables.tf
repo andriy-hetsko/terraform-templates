@@ -32,3 +32,13 @@ variable "healthcheck_path" {
   type    = string
   default = "/health"
 }
+
+variable "target_type" {
+  type        = string
+  description = "Target type for TG: ip (ECS/Fargate= ip) or instance (EC2= instance)"
+}
+
+variable "tags" {
+  type    = map(string)
+  default = {}
+}
