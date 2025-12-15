@@ -7,7 +7,7 @@ locals {
       },
       {
         name   = "name"
-        values = ["ubuntu/images/hvm-ssd/ubuntu*${var.ami_settings.ami_os_version}*"]
+        values = ["ubuntu/images/hvm-ssd/ubuntu*${var.ami_settings.ami_os_version}-*"]
       },
       {
         name   = "root-device-type"
