@@ -14,10 +14,6 @@ variable "backend_bucket" {
   type = string
 }
 
-variable "compute_type" {
-  type = string
-}
-
 variable "enable_ssm" {
   type    = bool
   default = true
