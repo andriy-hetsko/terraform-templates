@@ -42,3 +42,28 @@ resource "aws_security_group" "ecs" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+resource "aws_security_group" "ec2" {
+  name        = "${var.project_name}-${var.environment}-ec2-sg"
+  description = "EC2 security group"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    from_port   = var.app_port
+    to_port     = var.app_port
+    protocol    = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Project     = var.project_name
+    Environment = var.environment
+  }
+}
