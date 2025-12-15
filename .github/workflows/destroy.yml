@@ -99,7 +99,7 @@ jobs:
             - name: Check if IAM-ECS state exists
               id: iam_ecs_state
               run: |
-                if aws s3 ls s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/iam-ecs/terraform.tfstate >/dev/null 2>&1; then
+                if aws s3 ls s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}згначить  >/dev/null 2>&1; then
                     echo "exists=true" >> $GITHUB_OUTPUT
                 else
                     echo "exists=false" >> $GITHUB_OUTPUT
