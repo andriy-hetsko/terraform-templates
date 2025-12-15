@@ -5,6 +5,7 @@ variable "ami_settings" {
   type = object({
     ami_type       = string
     ami_os_version = string
+    ami_codename    = string
     ami_arch       = string
     owners         = list(string)
     filters        = list(any)
