@@ -3,11 +3,15 @@ locals {
     ubuntu = [
       {
         name   = "architecture"
-        values = [var.ami_settings.ami_arch]
+        values = [
+          var.ami_settings.ami_arch == "amd64" ? "x86_64" : var.ami_settings.ami_arch
+        ]
       },
       {
         name   = "name"
-        values = ["ubuntu/images/hvm-ssd/ubuntu*${var.ami_settings.ami_os_version}*"]
+        values = [
+          "ubuntu/images/hvm-ssd-gp3/ubuntu-${var.ami_settings.ami_codename}-${var.ami_settings.ami_os_version}-amd64-server-*"
+        ]
       },
       {
         name   = "root-device-type"
@@ -18,12 +22,14 @@ locals {
         values = ["hvm"]
       }
     ]
+
     custom = var.ami_settings.filters
   }
 
   ami_filters = local.ami_filters_map[var.ami_settings.ami_type]
-
 }
+
+
 data "aws_ami" "this" {
   most_recent = true
   owners      = var.ami_settings.owners
