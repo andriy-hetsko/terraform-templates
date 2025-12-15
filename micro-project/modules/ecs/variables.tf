@@ -40,3 +40,13 @@ variable "enable_exec" {
   type    = bool
   default = true
 }
+
+variable "execution_role_arn" {
+  type        = string
+  description = "ECS task execution role ARN"
+}
+
+variable "task_role_arn" {
+  type        = string
+  description = "ECS task role ARN"
+}

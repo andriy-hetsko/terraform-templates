@@ -68,7 +68,14 @@ on:
         default: "1"
       enable_exec:
         default: "true"
-
+      enable_ecr_pull:
+        default: "true"
+      enable_secrets_manager: 
+        default: "false"
+      enable_s3_read: 
+        default: "false"
+      enable_cloudwatch_logs:
+        default: "false"
 
 jobs:
   infra:
@@ -153,22 +160,32 @@ jobs:
             "project_name": "${PROJECT_NAME}",
             "environment": "${ENVIRONMENT}",
             "prefix": "${PROJECT_NAME}",
+
             "cidr": "${CIDR}",
             "azs": ${AZS},
             "public_subnets": ${PUBLIC_SUBNETS},
             "private_subnets": ${PRIVATE_SUBNETS}, 
+
             "app_port": "${APP_PORT}", 
             "aws_region": "${AWS_REGION}", 
             "backend_bucket": "${PROJECT_NAME}-backend-tf", 
+
             "listener_port": "${LISTENER_PORT}",
             "target_port": "${TARGET_PORT}",
             "healthcheck_path": "${HEALTHCHECK_PATH}", 
+
             "container_image": "${CONTAINER_IMAGE}",
             "container_port": ${CONTAINER_PORT},
             "cpu": ${CPU},
             "memory": ${MEMORY},
             "desired_count": ${DESIRED_COUNT},
-            "enable_exec": ${ENABLE_EXEC}
+            "enable_exec": ${ENABLE_EXEC}, 
+
+            "enable_ecr_pull": true,
+            "enable_secrets_manager": false,
+            "enable_s3_read": false,
+            "enable_cloudwatch_logs": false
+            
           }
           EOF
 
@@ -260,6 +277,33 @@ jobs:
         working-directory: ./micro-project/alb
         run: terraform apply -auto-approve tfplan
 
+
+# -------------------------------------------
+#  INIT + DEPLOY IAM ECS
+# -------------------------------------------
+      - name: Download tfvars from S3
+        if: inputs.compute_type == 'ecs'
+        working-directory: ./micro-project/iam-ecs
+        run: |
+          aws s3 cp \
+            s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json \
+            terraform.auto.tfvars.json
+
+      - name: Terraform Init IAM ECS
+        if: inputs.compute_type == 'ecs'
+        working-directory: ./micro-project/iam-ecs
+        run: |
+          terraform init \
+            -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+            -backend-config="key=${ENVIRONMENT}/iam-ecs/terraform.tfstate" \
+            -backend-config="region=${AWS_REGION}"
+
+      - name: Terraform Apply IAM ECS
+        if: inputs.compute_type == 'ecs'
+        working-directory: ./micro-project/iam-ecs
+        run: terraform apply -auto-approve
+        
+        
 # -------------------------------------------
 #  INIT + DEPLOY ECS
 # -------------------------------------------

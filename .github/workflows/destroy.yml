@@ -94,6 +94,40 @@ jobs:
 
 
 # -------------------------------------------
+#  INIT + DESYTROY IAM-ECS
+# -------------------------------------------
+            - name: Check if IAM-ECS state exists
+              id: iam_ecs_state
+              run: |
+                if aws s3 ls s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/iam-ecs/terraform.tfstate >/dev/null 2>&1; then
+                    echo "exists=true" >> $GITHUB_OUTPUT
+                else
+                    echo "exists=false" >> $GITHUB_OUTPUT
+                fi
+
+            - name: Download tfvars from S3
+              if: steps.iam_ecs_state.outputs.exists == 'true'
+              working-directory: ./micro-project/iam-ecs
+              run: |
+                aws s3 cp \
+                    s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json \
+                    terraform.auto.tfvars.json
+            - name: Terraform Init IAM-ECS (with backend config)
+              if: steps.iam_ecs_state.outputs.exists == 'true'
+              working-directory: ./micro-project/iam-ecs
+              run: |
+                terraform init \
+                    -backend-config="bucket=${BUCKET_NAME_BACKEND}" \
+                    -backend-config="key=${ENVIRONMENT}/iam-ecs/terraform.tfstate" \
+                    -backend-config="region=${AWS_REGION}" \
+                    -backend-config="encrypt=true"
+
+            - name: Terraform Destroy IAM-ECS
+              if: steps.iam_ecs_state.outputs.exists == 'true'
+              working-directory: ./micro-project/iam-ecs
+              run: terraform destroy -auto-approve 
+
+# -------------------------------------------
 #  INIT + DESYTROY ALB
 # -------------------------------------------
             - name: Download tfvars from S3
