@@ -59,6 +59,41 @@ jobs:
                   terraform_version: "1.6.6"
 
 # -------------------------------------------
+#  INIT + DESYTROY IAM-EC2
+# -------------------------------------------
+            - name: Check if IAM-EC2 state exists
+              id: iam_ec2_state
+              run: |
+                if aws s3 ls s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}згначить  >/dev/null 2>&1; then
+                    echo "exists=true" >> $GITHUB_OUTPUT
+                else
+                    echo "exists=false" >> $GITHUB_OUTPUT
+                fi
+
+            - name: Download tfvars from S3
+              if: steps.iam_ec2_state.outputs.exists == 'true'
+              working-directory: ./micro-project/iam-ec2
+              run: |
+                aws s3 cp \
+                    s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json \
+                    terraform.auto.tfvars.json
+            - name: Terraform Init IAM-EC2 (with backend config)
+              if: steps.iam_ec2_state.outputs.exists == 'true'
+              working-directory: ./micro-project/iam-ec2
+              run: |
+                terraform init \
+                    -backend-config="bucket=${BUCKET_NAME_BACKEND}" \
+                    -backend-config="key=${ENVIRONMENT}/iam-ec2/terraform.tfstate" \
+                    -backend-config="region=${AWS_REGION}" \
+                    -backend-config="encrypt=true"
+
+            - name: Terraform Destroy IAM-EC2
+              if: steps.iam_ec2_state.outputs.exists == 'true'
+              working-directory: ./micro-project/iam-ec2
+              run: terraform destroy -auto-approve 
+
+
+# -------------------------------------------
 #  INIT + DESYTROY ECS
 # -------------------------------------------
             - name: Check if ECS state exists
