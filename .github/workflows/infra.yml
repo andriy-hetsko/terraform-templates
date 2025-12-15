@@ -182,7 +182,7 @@ jobs:
             "enable_cloudwatch_logs": false, 
             "enable_ssm": true, 
 
-            "compute_type": ${COMPUTE_TYPE}
+            "compute_type": "${COMPUTE_TYPE}"
             
           }
           EOF
