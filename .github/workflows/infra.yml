@@ -177,7 +177,8 @@ jobs:
             "enable_ecr_pull": true,
             "enable_secrets_manager": false,
             "enable_s3_read": false,
-            "enable_cloudwatch_logs": false
+            "enable_cloudwatch_logs": false, 
+            "enable_ssm": true
             
           }
           EOF

@@ -7,9 +7,6 @@ module "iam_ec2" {
 
   enable_ssm             = var.enable_ssm
   enable_cloudwatch_logs = var.enable_cloudwatch_logs
-
-
-  enable_ecr_pull = var.compute_type 
-
-  enable_s3_read = var.enable_s3_read
+  enable_ecr_pull        = var.enable_ecr_pull
+  enable_s3_read         = var.enable_s3_read
 }
