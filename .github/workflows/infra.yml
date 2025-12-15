@@ -68,14 +68,7 @@ on:
         default: "1"
       enable_exec:
         default: "true"
-      enable_ecr_pull:
-        default: "true"
-      enable_secrets_manager: 
-        default: "false"
-      enable_s3_read: 
-        default: "false"
-      enable_cloudwatch_logs:
-        default: "false"
+
 
 jobs:
   infra:
