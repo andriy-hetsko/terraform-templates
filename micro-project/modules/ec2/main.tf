@@ -7,7 +7,7 @@ locals {
       },
       {
         name   = "name"
-        values = ["ubuntu/images/hvm-ssd/ubuntu*${var.ami_settings.ami_os_version}-amd64-server-*"]
+        values = ["ubuntu/images/hvm-ssd/ubuntu*${var.ami_settings.ami_os_version}*"]
       },
       {
         name   = "root-device-type"
@@ -22,8 +22,8 @@ locals {
   }
 
   ami_filters = local.ami_filters_map[var.ami_settings.ami_type]
-}
 
+}
 data "aws_ami" "this" {
   most_recent = true
   owners      = var.ami_settings.owners
