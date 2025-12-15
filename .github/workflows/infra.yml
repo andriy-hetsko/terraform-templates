@@ -358,3 +358,28 @@ jobs:
         if: inputs.compute_type == 'ec2'
         working-directory: ./micro-project/iam-ec2
         run: terraform apply -auto-approve
+
+# -------------------------------------------
+# INIT + APPLY EC2
+# -------------------------------------------
+      - name: Download tfvars from S3
+        if: inputs.compute_type == 'ec2'
+        working-directory: ./micro-project/ec2
+        run: |
+          aws s3 cp \
+            s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json \
+            terraform.auto.tfvars.json
+
+      - name: Terraform Init IAM-EC2
+        if: inputs.compute_type == 'ec2'
+        working-directory: ./micro-project/ec2
+        run: |
+          terraform init \
+            -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+            -backend-config="key=${ENVIRONMENT}/ec2/terraform.tfstate" \
+            -backend-config="region=${AWS_REGION}"
+
+      - name: Terraform Apply EC2
+        if: inputs.compute_type == 'ec2'
+        working-directory: ./micro-project/ec2
+        run: terraform apply -auto-approve
