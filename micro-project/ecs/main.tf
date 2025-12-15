@@ -11,7 +11,7 @@ data "terraform_remote_state" "sg" {
   backend = "s3"
   config = {
     bucket = var.backend_bucket
-    key    = "${var.environment}/security-groups/terraform.tfstate"
+    key    = "${var.environment}/security-group/terraform.tfstate"
     region = var.aws_region
   }
 }
@@ -42,7 +42,7 @@ module "ecs" {
 
   task_role_arn      = data.terraform_remote_state.iam_ecs.outputs.task_role_arn
   execution_role_arn = data.terraform_remote_state.iam_ecs.outputs.execution_role_arn
-  
+
   container_name  = var.project_name
   container_image = var.container_image
   container_port  = var.container_port
