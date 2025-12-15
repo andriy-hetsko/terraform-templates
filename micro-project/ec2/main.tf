@@ -41,7 +41,7 @@ module "ec2" {
 
   ami_settings = {
     ami_type       = "ubuntu"
-    ami_os_version = "noble-24.04"
+    ami_os_version = "22.04"
     ami_arch       = "x86_64"
     owners         = ["099720109477"]
     filters        = []
