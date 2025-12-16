@@ -17,8 +17,6 @@ if ! blkid "$DEVICE"; then
 fi
 
 mkdir -p "$MOUNT"
-chown -R postgres:postgres /postgres_data
-
 
 # Mount (idempotent)
 if ! mountpoint -q "$MOUNT"; then
@@ -40,6 +38,7 @@ apt update -y
 
 apt install postgresql-17 -y
 sudo -u postgres /usr/lib/postgresql/17/bin/initdb -D /postgres_data
+chown -R postgres:postgres /postgres_data
 systemctl start postgresql
 systemctl stop postgresql
 
