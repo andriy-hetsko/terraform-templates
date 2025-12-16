@@ -374,7 +374,7 @@ jobs:
             s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json \
             terraform.auto.tfvars.json
 
-      - name: Terraform Init IAM-EC2
+      - name: Terraform Init EC2
         if: inputs.compute_type == 'ec2'
         working-directory: ./micro-project/ec2
         run: |

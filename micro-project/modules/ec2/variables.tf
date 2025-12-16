@@ -5,7 +5,7 @@ variable "ami_settings" {
   type = object({
     ami_type       = string
     ami_os_version = string
-    ami_codename    = string
+    ami_codename   = string
     ami_arch       = string
     owners         = list(string)
     filters        = list(any)
@@ -14,9 +14,9 @@ variable "ami_settings" {
 variable "data_volume" {
   type = object({
     enabled    = bool
-    device     = string
-    size       = number
-    type       = string
+    device     = optional(string)
+    size       = optional(number)
+    type       = optional(string)
     iops       = optional(number)
     throughput = optional(number)
   })
