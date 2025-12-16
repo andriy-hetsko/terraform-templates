@@ -42,6 +42,7 @@ jobs:
                 # ------------------
                 # Network
                 # ------------------
+                prefix:          .project.name,
                 cidr:            .network.cidr,
                 azs:             .network.azs,
                 public_subnets:  .network.public_subnets,
