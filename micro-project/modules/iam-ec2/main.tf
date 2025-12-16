@@ -22,3 +22,8 @@ resource "aws_iam_instance_profile" "profile" {
   name = "${var.project_name}-${var.environment}-ec2-profile"
   role = aws_iam_role.this.name
 }
+
+resource "aws_iam_role_policy_attachment" "ssm" {
+  role       = aws_iam_role.this.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}

@@ -67,6 +67,8 @@ module "ec2" {
     sudo systemctl enable docker
     sudo systemctl start docker
     sudo usermod -aG docker $USER 
+    sudo systemctl enable amazon-ssm-agent
+    sudo systemctl start amazon-ssm-agent
   EOF
 }
 
