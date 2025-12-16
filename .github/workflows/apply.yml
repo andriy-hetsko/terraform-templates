@@ -128,9 +128,9 @@ jobs:
       # ------------------------
       - name: Export common variables
         run: |
-            echo "PROJECT_NAME=$(jq -r .project.name terraform.tfvars.json)" >> $GITHUB_ENV
-            echo "ENVIRONMENT=$(jq -r .project.environment terraform.tfvars.json)" >> $GITHUB_ENV
-            echo "AWS_REGION=$(jq -r .project.aws_region terraform.tfvars.json)" >> $GITHUB_ENV
+            echo "PROJECT_NAME=$(echo '${{ inputs.infra_config }}' | jq -r .project.name)" >> $GITHUB_ENV
+            echo "ENVIRONMENT=$(echo '${{ inputs.infra_config }}' | jq -r .project.environment)" >> $GITHUB_ENV
+            echo "AWS_REGION=$(echo '${{ inputs.infra_config }}' | jq -r .project.aws_region)" >> $GITHUB_ENV
 
       # ------------------------
       # AWS Credentials
