@@ -59,3 +59,8 @@ variable "tags" {
   type    = map(string)
   default = {}
 }
+
+variable "role" {
+  description = "Logical role of EC2 instance (postgres17, app etc)"
+  type        = string
+}

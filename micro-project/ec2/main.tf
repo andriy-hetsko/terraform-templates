@@ -38,6 +38,7 @@ module "ec2" {
 
   project_name = var.project_name
   environment  = var.environment
+  role        = "app"
 
   ami_settings = {
     ami_type       = "ubuntu"

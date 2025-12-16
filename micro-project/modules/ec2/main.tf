@@ -45,9 +45,10 @@ data "aws_ami" "this" {
 
 locals {
   tags = merge({
-    Name        = "${var.project_name}-${var.environment}-ec2"
+    Name        = "${var.project_name}-${var.environment}-${var.role}"
     Project     = var.project_name
     Environment = var.environment
+    Role        = var.role
   }, var.tags)
 }
 
