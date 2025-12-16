@@ -17,30 +17,36 @@ if ! blkid "$DEVICE"; then
 fi
 
 mkdir -p "$MOUNT"
+chown -R postgres:postgres /postgres_data
 
-# Mount
-mount "$DEVICE" "$MOUNT"
+
+# Mount (idempotent)
+if ! mountpoint -q "$MOUNT"; then
+  mount "$DEVICE" "$MOUNT"
+fi
 
 UUID=$(blkid -s UUID -o value "$DEVICE")
 grep -q "$UUID" /etc/fstab || \
   echo "UUID=$UUID $MOUNT xfs defaults,noatime,nofail 0 2" >> /etc/fstab
 
+systemctl daemon-reload
+mount -a
+
 # Install Postgres
-sudo apt update
-sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
-sudo apt update
+apt update -y
+sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc |  gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/postgresql.gpg
+apt update -y
 
-sudo apt install postgresql-17
-sudo systemctl start postgresql
-sudo systemctl stop postgresql
+apt install postgresql-17 -y
+sudo -u postgres /usr/lib/postgresql/17/bin/initdb -D /postgres_data
+systemctl start postgresql
+systemctl stop postgresql
 
 
-#Init NEW cluster in /postgres_data
-if [ ! -f "$MOUNT/PG_VERSION" ]; then
-  chown -R postgres:postgres "$MOUNT"
-  chmod 700 "$MOUNT"
-  sudo -u postgres ${PG_BIN}/initdb -D "$MOUNT"
+# Recreate cluster if needed
+if ! pg_lsclusters | grep -q "17.*main"; then
+  pg_createcluster 17 main --datadir="$MOUNT"
 fi
 
 #Configure PostgreSQL
