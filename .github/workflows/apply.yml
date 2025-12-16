@@ -1,4 +1,4 @@
-name: Full Infrastructure Provision
+name: Full Infrastructure Provision json
 
 on:
   workflow_dispatch:
