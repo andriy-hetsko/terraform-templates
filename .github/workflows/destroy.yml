@@ -63,7 +63,7 @@ jobs:
             - name: Check if Postgres state exists
               id: postgres_state
               run: |
-                if aws s3 ls s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/ec2/terraform.tfstate >/dev/null 2>&1; then
+                if aws s3 ls s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/ec2-postgres/terraform.tfstate >/dev/null 2>&1; then
                     echo "exists=true" >> $GITHUB_OUTPUT
                 else
                     echo "exists=false" >> $GITHUB_OUTPUT
