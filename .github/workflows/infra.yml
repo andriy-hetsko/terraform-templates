@@ -72,6 +72,31 @@ on:
       enable_exec:
         default: "true"
 
+    #rds_data
+      db_name: 
+        default: "appdb"
+      db_username:
+        default: "postgres"
+      
+      db_password: 
+      db_instance_class: 
+        default: "db.t3.micro"
+      allocated_storage:
+        default: "50"
+      max_allocated_storage:
+        default: "null"
+      engine_version:
+        default: "17.2"
+      multi_az: 
+        default: "false"
+      backup_retention_period:
+        default: "7"
+      skip_final_snapshot:
+        default:  "true"
+      
+      deletion_protection: 
+        default: "false"
+
 
 jobs:
   infra:
@@ -103,6 +128,22 @@ jobs:
 
       COMPUTE_TYPE: ${{ inputs.compute_type }}
       DATA_BASE_TYPE: ${{ inputs.data_base_type }}
+
+      DB_NAME: ${{ inputs.db_name }}
+      DB_USERNAME: ${{ inputs.db_username }}
+      DB_PASSWORD: ${{ inputs.db_password }}
+
+      DB_INSTANCE_CLASS: ${{ inputs.db_instance_class }}
+      ALLOCATED_STORAGE: ${{ inputs.allocated_storage }}
+      MAX_ALLOCATED_STORAGE: ${{ inputs.max_allocated_storage }}
+
+      ENGINE_VERSION: ${{ inputs.engine_version }}
+
+      MULTI_AZ: ${{ inputs.multi_az }}
+      BACKUP_RETENTION_PERIOD: ${{ inputs.backup_retention_period }}
+
+      SKIP_FINAL_SNAPSHOT: ${{ inputs.skip_final_snapshot }}
+      DELETION_PROTECTION: ${{ inputs.deletion_protection }}
 
     steps:
       - name: Checkout
@@ -186,7 +227,19 @@ jobs:
             "enable_cloudwatch_logs": false, 
             "enable_ssm": true, 
 
-            "compute_type": "${COMPUTE_TYPE}"
+            "compute_type": "${COMPUTE_TYPE}", 
+            
+            "db_name": "${DB_NAME}",
+            "db_username": "${DB_USERNAME}",
+            "db_password": "${DB_PASSWORD}",
+            "db_instance_class": "${DB_INSTANCE_CLASS}",
+            "allocated_storage": "${ALLOCATED_STORAGE}",
+            "max_allocated_storage": "${MAX_ALLOCATED_STORAGE}",
+            "engine_version": "${ENGINE_VERSION}",
+            "multi_az": "${MULTI_AZ}",
+            "backup_retention_period": "${BACKUP_RETENTION_PERIOD}",
+            "skip_final_snapshot": "${SKIP_FINAL_SNAPSHOT}",
+            "deletion_protection": "${DELETION_PROTECTION}"
             
           }
           EOF
@@ -411,4 +464,29 @@ jobs:
       - name: Terraform Apply Postgres
         if: inputs.data_base_type == 'ec2'
         working-directory: ./micro-project/ec2-postgres
+        run: terraform apply -auto-approve
+
+# -------------------------------------------
+# INIT + DEPLOY RDS Postgres
+# -------------------------------------------
+      - name: Download tfvars from S3
+        if: inputs.data_base_type == 'RDS'
+        working-directory: ./micro-project/rds-postgres
+        run: |
+          aws s3 cp \
+            s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json \
+            terraform.auto.tfvars.json
+
+      - name: Terraform Init RDS Postgres
+        if: inputs.data_base_type == 'RDS'
+        working-directory: ./micro-project/rds-postgres
+        run: |
+          terraform init \
+            -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+            -backend-config="key=${ENVIRONMENT}/rds-postgres/terraform.tfstate" \
+            -backend-config="region=${AWS_REGION}"
+
+      - name: Terraform Apply RDS Postgres
+        if: inputs.data_base_type == 'RDS'
+        working-directory: ./micro-project/rds-postgres
         run: terraform apply -auto-approve
