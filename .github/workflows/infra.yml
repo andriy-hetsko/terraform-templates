@@ -57,6 +57,9 @@ on:
       compute_type:
         type: choice
         options: [ecs, ec2]
+      data_base_type:
+        type: choice
+        options: [RDS, ec2]
       container_image:
         required: true
         default: "nginx:1.25-alpine"
@@ -99,6 +102,7 @@ jobs:
       ENABLE_EXEC:     ${{ inputs.enable_exec }}
 
       COMPUTE_TYPE: ${{ inputs.compute_type }}
+      DATA_BASE_TYPE: ${{ inputs.data_base_type }}
 
     steps:
       - name: Checkout
@@ -335,7 +339,7 @@ jobs:
 
 
 # -------------------------------------------
-# INIT + APPLY IAM-EC2
+# INIT + DEPLOY IAM-EC2
 # -------------------------------------------
       - name: Download tfvars from S3
         if: inputs.compute_type == 'ec2'
@@ -360,7 +364,7 @@ jobs:
         run: terraform apply -auto-approve
 
 # -------------------------------------------
-# INIT + APPLY EC2
+# INIT + DEPLOY  EC2
 # -------------------------------------------
       - name: Download tfvars from S3
         if: inputs.compute_type == 'ec2'
@@ -382,4 +386,29 @@ jobs:
       - name: Terraform Apply EC2
         if: inputs.compute_type == 'ec2'
         working-directory: ./micro-project/ec2
+        run: terraform apply -auto-approve
+
+# -------------------------------------------
+# INIT + DEPLOY  EC2 Postgres
+# -------------------------------------------
+      - name: Download tfvars from S3
+        if: inputs.data_base_type == 'ec2'
+        working-directory: ./micro-project/ec2-postgres
+        run: |
+          aws s3 cp \
+            s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json \
+            terraform.auto.tfvars.json
+
+      - name: Terraform Init Postgres
+        if: inputs.data_base_type == 'ec2'
+        working-directory: ./micro-project/ec2-postgres
+        run: |
+          terraform init \
+            -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+            -backend-config="key=${ENVIRONMENT}/ec2-postgres/terraform.tfstate" \
+            -backend-config="region=${AWS_REGION}"
+
+      - name: Terraform Apply Postgres
+        if: inputs.data_base_type == 'ec2'
+        working-directory: ./micro-project/ec2-postgres
         run: terraform apply -auto-approve

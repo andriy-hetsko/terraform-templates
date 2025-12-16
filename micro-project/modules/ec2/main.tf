@@ -67,6 +67,17 @@ resource "aws_instance" "this" {
     throughput  = try(var.root_volume.throughput, null)
   }
 
+  dynamic "ebs_block_device" {
+  for_each = var.data_volume.enabled ? [1] : []
+  content {
+    device_name = var.data_volume.device
+    volume_size = var.data_volume.size
+    volume_type = var.data_volume.type
+    iops        = try(var.data_volume.iops, null)
+    throughput  = try(var.data_volume.throughput, null)
+  }
+}
+
   user_data = var.user_data != "" ? var.user_data : null
 
   metadata_options {
@@ -79,3 +90,6 @@ resource "aws_instance" "this" {
 
   tags = local.tags
 }
+
+
+

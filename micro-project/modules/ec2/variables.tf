@@ -11,6 +11,19 @@ variable "ami_settings" {
     filters        = list(any)
   })
 }
+variable "data_volume" {
+  type = object({
+    enabled    = bool
+    device     = string
+    size       = number
+    type       = string
+    iops       = optional(number)
+    throughput = optional(number)
+  })
+  default = {
+    enabled = false
+  }
+}
 
 variable "instance_type" {}
 variable "subnet_id" {}
