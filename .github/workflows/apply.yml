@@ -32,12 +32,14 @@ jobs:
         run: |
             jq '
             {
+                
                 # ------------------
                 # Project
                 # ------------------
                 project_name: .project.name,
                 environment:  .project.environment,
                 aws_region:   .project.aws_region,
+                backend_bucket: (.project.name + "-backend-tf"),
 
                 # ------------------
                 # Network
