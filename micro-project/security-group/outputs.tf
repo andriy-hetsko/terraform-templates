@@ -9,3 +9,9 @@ output "ecs_sg_id" {
 output "ec2_sg_id" {
   value = module.security_groups.ec2_sg_id
 }
+
+output "postgres_sg_id" {
+  value = module.security_groups.postgres_sg_id
+}
+
+
