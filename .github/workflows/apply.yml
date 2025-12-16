@@ -28,16 +28,100 @@ jobs:
         run: |
           echo '${{ inputs.infra_config }}' | jq .
 
-      # ------------------------
-      # Create terraform.tfvars.json
-      # ------------------------
-      - name: Generate terraform.tfvars.json
+      - name: Build terraform.tfvars.json
         run: |
-          echo '${{ inputs.infra_config }}' \
-          | jq '.database.db_password = env.DB_PASSWORD' \
-          > terraform.tfvars.json
+            jq '
+            {
+                # ------------------
+                # Project
+                # ------------------
+                project_name: .project.name,
+                environment:  .project.environment,
+                aws_region:   .project.aws_region,
+
+                # ------------------
+                # Network
+                # ------------------
+                cidr:            .network.cidr,
+                azs:             .network.azs,
+                public_subnets:  .network.public_subnets,
+                private_subnets: .network.private_subnets,
+
+                # ------------------
+                # Compute selector
+                # ------------------
+                compute_type:
+                (if .compute.ecs.enabled then "ecs"
+                elif .compute.ec2.enabled then "ec2"
+                else null end),
+
+                # ------------------
+                # ALB
+                # ------------------
+                listener_port:    .alb.listener_port,
+                target_port:      .alb.target_port,
+                healthcheck_path: .alb.healthcheck_path,
+
+                # ------------------
+                # EC2 compute
+                # ------------------
+                instance_type:
+                (if .compute.ec2.enabled then .compute.ec2.instance_type else null end),
+                key_name:
+                (if .compute.ec2.enabled then .compute.ec2.key_name else null end),
+
+                # ------------------
+                # Database selector
+                # ------------------
+                data_base_type:
+                (if .database.rds.enabled then "RDS"
+                elif .database.ec2.enabled then "ec2"
+                else null end),
+
+                # ------------------
+                # RDS Postgres
+                # ------------------
+                db_name:
+                (if .database.rds.enabled then .database.rds.db_name else null end),
+                db_username:
+                (if .database.rds.enabled then .database.rds.db_username else null end),
+                db_instance_class:
+                (if .database.rds.enabled then .database.rds.db_instance_class else null end),
+                allocated_storage:
+                (if .database.rds.enabled then .database.rds.allocated_storage else null end),
+                max_allocated_storage:
+                (if .database.rds.enabled then .database.rds.max_allocated_storage else null end),
+                engine_version:
+                (if .database.rds.enabled then .database.rds.engine_version else null end),
+                multi_az:
+                (if .database.rds.enabled then .database.rds.multi_az else null end),
+                backup_retention_period:
+                (if .database.rds.enabled then .database.rds.backup_retention_period else null end),
+                skip_final_snapshot:
+                (if .database.rds.enabled then .database.rds.skip_final_snapshot else null end),
+                deletion_protection:
+                (if .database.rds.enabled then .database.rds.deletion_protection else null end),
+
+                # ------------------
+                # EC2 Postgres
+                # ------------------
+                db_engine:
+                (if .database.ec2.enabled then .database.ec2.engine else null end),
+                db_instance_type:
+                (if .database.ec2.enabled then .database.ec2.instance_type else null end),
+                db_volume_size:
+                (if .database.ec2.enabled then .database.ec2.volume_size else null end),
+
+                # ------------------
+                # Secret (injected)
+                # ------------------
+                db_password: env.DB_PASSWORD
+            }
+            | with_entries(select(.value != null))
+            ' <<< '${{ inputs.infra_config }}' > terraform.tfvars.json
         env:
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
 
       # ------------------------
       # Extract common vars
