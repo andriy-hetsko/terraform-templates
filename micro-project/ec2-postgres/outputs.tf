@@ -9,3 +9,5 @@ output "postgres_private_ip" {
 output "postgres_ami_id" {
   value = module.postgres_ec2.ami_id
 }
+
+
