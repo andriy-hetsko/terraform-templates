@@ -72,32 +72,6 @@ on:
       enable_exec:
         default: "true"
 
-    #rds_data
-      db_name: 
-        default: "appdb"
-      db_username:
-        default: "postgres"
-      
-      db_password: 
-      db_instance_class: 
-        default: "db.t3.micro"
-      allocated_storage:
-        default: "50"
-      max_allocated_storage:
-        default: "null"
-      engine_version:
-        default: "17.2"
-      multi_az: 
-        default: "false"
-      backup_retention_period:
-        default: "7"
-      skip_final_snapshot:
-        default:  "true"
-      
-      deletion_protection: 
-        default: "false"
-
-
 jobs:
   infra:
     runs-on: ubuntu-latest
@@ -126,24 +100,24 @@ jobs:
       DESIRED_COUNT:   ${{ inputs.desired_count }}
       ENABLE_EXEC:     ${{ inputs.enable_exec }}
 
-      COMPUTE_TYPE: ${{ inputs.compute_type }}
-      DATA_BASE_TYPE: ${{ inputs.data_base_type }}
+      # COMPUTE_TYPE: ${{ inputs.compute_type }}
+      # DATA_BASE_TYPE: ${{ inputs.data_base_type }}
 
-      DB_NAME: ${{ inputs.db_name }}
-      DB_USERNAME: ${{ inputs.db_username }}
-      DB_PASSWORD: ${{ inputs.db_password }}
+      # DB_NAME: ${{ inputs.db_name }}
+      # DB_USERNAME: ${{ inputs.db_username }}
+      # DB_PASSWORD: ${{ inputs.db_password }}
 
-      DB_INSTANCE_CLASS: ${{ inputs.db_instance_class }}
-      ALLOCATED_STORAGE: ${{ inputs.allocated_storage }}
-      MAX_ALLOCATED_STORAGE: ${{ inputs.max_allocated_storage }}
+      # DB_INSTANCE_CLASS: ${{ inputs.db_instance_class }}
+      # ALLOCATED_STORAGE: ${{ inputs.allocated_storage }}
+      # MAX_ALLOCATED_STORAGE: ${{ inputs.max_allocated_storage }}
 
-      ENGINE_VERSION: ${{ inputs.engine_version }}
+      # ENGINE_VERSION: ${{ inputs.engine_version }}
 
-      MULTI_AZ: ${{ inputs.multi_az }}
-      BACKUP_RETENTION_PERIOD: ${{ inputs.backup_retention_period }}
+      # MULTI_AZ: ${{ inputs.multi_az }}
+      # BACKUP_RETENTION_PERIOD: ${{ inputs.backup_retention_period }}
 
-      SKIP_FINAL_SNAPSHOT: ${{ inputs.skip_final_snapshot }}
-      DELETION_PROTECTION: ${{ inputs.deletion_protection }}
+      # SKIP_FINAL_SNAPSHOT: ${{ inputs.skip_final_snapshot }}
+      # DELETION_PROTECTION: ${{ inputs.deletion_protection }}
 
     steps:
       - name: Checkout

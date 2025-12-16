@@ -1,0 +1,189 @@
+name: Full Infrastructure Provision
+
+on:
+  workflow_dispatch:
+    inputs:
+      infra_config:
+        description: "Full infrastructure configuration (JSON)"
+        required: true
+
+jobs:
+  infra:
+    runs-on: ubuntu-latest
+
+    env:
+      TF_IN_AUTOMATION: true
+
+    steps:
+      # ------------------------
+      # Checkout
+      # ------------------------
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ------------------------
+      # Validate JSON
+      # ------------------------
+      - name: Validate infra_config JSON
+        run: |
+          echo '${{ inputs.infra_config }}' | jq .
+
+      # ------------------------
+      # Create terraform.tfvars.json
+      # ------------------------
+      - name: Generate terraform.tfvars.json
+        run: |
+          echo '${{ inputs.infra_config }}' \
+          | jq '.database.db_password = env.DB_PASSWORD' \
+          > terraform.tfvars.json
+        env:
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
+      # ------------------------
+      # Extract common vars
+      # ------------------------
+      - name: Export common variables
+        run: |
+          echo "PROJECT_NAME=$(jq -r .project_name terraform.tfvars.json)" >> $GITHUB_ENV
+          echo "ENVIRONMENT=$(jq -r .environment terraform.tfvars.json)" >> $GITHUB_ENV
+          echo "AWS_REGION=$(jq -r .aws_region terraform.tfvars.json)" >> $GITHUB_ENV
+
+      # ------------------------
+      # AWS Credentials
+      # ------------------------
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # ------------------------
+      # Setup Terraform
+      # ------------------------
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.6.6"
+
+      # -------------------------------------------
+      # Bootstrap backend bucket if needed
+      # -------------------------------------------
+      - name: Check backend bucket
+        id: check_bucket
+        run: |
+          if aws s3api head-bucket --bucket "${PROJECT_NAME}-backend-tf" 2>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create backend bucket
+        if: steps.check_bucket.outputs.exists == 'false'
+        working-directory: ./micro-project/backend
+        run: |
+          echo "backend_bucket_name = \"${PROJECT_NAME}-backend-tf\"" > backend.auto.tfvars
+          echo "aws_region = \"${AWS_REGION}\"" >> backend.auto.tfvars
+          terraform init
+          terraform apply -auto-approve
+
+      # -------------------------------------------
+      # Upload tfvars to S3
+      # -------------------------------------------
+      - name: Upload tfvars to S3
+        run: |
+          aws s3 cp terraform.tfvars.json \
+            s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json
+
+      # ===========================================
+      # VPC
+      # ===========================================
+      - name: Deploy VPC
+        working-directory: ./micro-project/vpc
+        run: |
+          aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
+          terraform init \
+            -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+            -backend-config="key=${ENVIRONMENT}/vpc/terraform.tfstate" \
+            -backend-config="region=${AWS_REGION}"
+          terraform apply -auto-approve
+
+      # ===========================================
+      # Security Group
+      # ===========================================
+      - name: Deploy Security Group
+        working-directory: ./micro-project/security-group
+        run: |
+          aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
+          terraform init \
+            -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+            -backend-config="key=${ENVIRONMENT}/security-group/terraform.tfstate" \
+            -backend-config="region=${AWS_REGION}"
+          terraform apply -auto-approve
+
+      # ===========================================
+      # ALB
+      # ===========================================
+      - name: Deploy ALB
+        working-directory: ./micro-project/alb
+        run: |
+          aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
+          terraform init \
+            -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+            -backend-config="key=${ENVIRONMENT}/alb/terraform.tfstate" \
+            -backend-config="region=${AWS_REGION}"
+          terraform apply -auto-approve
+
+      # ===========================================
+      # ECS (if selected)
+      # ===========================================
+      - name: Deploy ECS
+        if: fromJson(inputs.infra_config).compute.type == 'ecs'
+        working-directory: ./micro-project/ecs
+        run: |
+          aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
+          terraform init \
+            -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+            -backend-config="key=${ENVIRONMENT}/ecs/terraform.tfstate" \
+            -backend-config="region=${AWS_REGION}"
+          terraform apply -auto-approve
+
+      # ===========================================
+      # EC2 (if selected)
+      # ===========================================
+      - name: Deploy EC2
+        if: fromJson(inputs.infra_config).compute.type == 'ec2'
+        working-directory: ./micro-project/ec2
+        run: |
+          aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
+          terraform init \
+            -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+            -backend-config="key=${ENVIRONMENT}/ec2/terraform.tfstate" \
+            -backend-config="region=${AWS_REGION}"
+          terraform apply -auto-approve
+      # ===========================================
+      # EC2 Postgres
+      # ===========================================
+      - name: Deploy EC2 Postgres
+        if: fromJson(inputs.infra_config).database.type == 'ec2'
+        working-directory: ./micro-project/ec2-postgres
+        run: |
+          aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
+          terraform init \
+            -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+            -backend-config="key=${ENVIRONMENT}/ec2-postgres/terraform.tfstate" \
+            -backend-config="region=${AWS_REGION}"
+          terraform apply -auto-approve
+      # ===========================================
+      # RDS Postgres
+      # ===========================================
+      - name: Deploy RDS Postgres
+        if: fromJson(inputs.infra_config).database.type == 'RDS'
+        working-directory: ./micro-project/rds-postgres
+        run: |
+          aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
+          terraform init \
+            -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+            -backend-config="key=${ENVIRONMENT}/rds-postgres/terraform.tfstate" \
+            -backend-config="region=${AWS_REGION}"
+          terraform apply -auto-approve
