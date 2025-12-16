@@ -69,6 +69,7 @@ module "ec2" {
     sudo usermod -aG docker $USER 
     sudo systemctl enable amazon-ssm-agent
     sudo systemctl start amazon-ssm-agent
+    sudo docker run -p 3000:80 -d nginx
   EOF
 }
 
