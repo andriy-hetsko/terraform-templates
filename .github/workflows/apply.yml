@@ -225,7 +225,7 @@ jobs:
       # ECS (if selected)
       # ===========================================
       - name: Deploy ECS
-        if: fromJson(inputs.infra_config).compute.type == 'ecs'
+        if: fromJson(inputs.infra_config).compute.type == true
         working-directory: ./micro-project/ecs
         run: |
           aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
@@ -239,7 +239,7 @@ jobs:
       # EC2 (if selected)
       # ===========================================
       - name: Deploy EC2
-        if: fromJson(inputs.infra_config).compute.type == 'ec2'
+        if: fromJson(inputs.infra_config).compute.type == true
         working-directory: ./micro-project/ec2
         run: |
           aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
@@ -252,7 +252,7 @@ jobs:
       # EC2 Postgres
       # ===========================================
       - name: Deploy EC2 Postgres
-        if: fromJson(inputs.infra_config).database.type == 'ec2'
+        if: fromJson(inputs.infra_config).database.type == 'true'
         working-directory: ./micro-project/ec2-postgres
         run: |
           aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
@@ -265,7 +265,7 @@ jobs:
       # RDS Postgres
       # ===========================================
       - name: Deploy RDS Postgres
-        if: fromJson(inputs.infra_config).database.type == 'RDS'
+        if: fromJson(inputs.infra_config).database.type == true
         working-directory: ./micro-project/rds-postgres
         run: |
           aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
