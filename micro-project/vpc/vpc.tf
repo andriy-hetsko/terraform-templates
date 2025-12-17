@@ -3,7 +3,7 @@ module "vpc" {
   version = "5.9.0"
 
   name = var.prefix
-  cidr = "${var.prefix}-igw"
+  cidr = var.prefix
 
   azs             = var.azs
   public_subnets  = var.public_subnets
