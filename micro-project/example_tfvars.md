@@ -1,0 +1,62 @@
+{
+  "project": {
+    "name": "hetsko-json",
+    "environment": "dev",
+    "aws_region": "us-east-2"
+  },
+
+  "network": {
+    "enabled": true,
+    "cidr": "10.0.0.0/16",
+    "azs": ["us-east-2a", "us-east-2b", "us-east-2c"],
+    "public_subnets": ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"],
+    "private_subnets": ["10.0.11.0/24", "10.0.12.0/24", "10.0.13.0/24"]
+  },
+
+  "compute": {
+    "ecs": {
+      "enabled": false,
+      "container_image": "nginx:1.25-alpine",
+      "app_port": 3000,
+      "cpu": 256,
+      "memory": 512,
+      "desired_count": 1,
+      "enable_exec": true
+    },
+    "ec2": {
+      "enabled": true,
+      "instance_type": "t3.micro",
+      "key_name": null
+    }
+  },
+
+  "alb": {
+    "enabled": true,
+    "listener_port": 80,
+    "target_port": 3000,
+    "healthcheck_path": "/health"
+  },
+
+  "database": {
+    "rds": {
+      "enabled": false,
+      "engine": "postgres",
+      "engine_version": "17.2",
+      "db_name": "appdb",
+      "db_username": "postgres",
+      "db_instance_class": "db.t3.micro",
+      "allocated_storage": 50,
+      "max_allocated_storage": null,
+      "multi_az": false,
+      "backup_retention_period": 7,
+      "skip_final_snapshot": true,
+      "deletion_protection": false
+    },
+    "ec2": {
+      "enabled": true,
+      "engine": "postgres",
+      "instance_type": "t3.micro",
+      "volume_size": 50
+    }
+  }
+}
