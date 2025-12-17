@@ -3,12 +3,18 @@ name: Apply (Composite)
 on:
   workflow_dispatch:
     inputs:
+      project_name:
+        description: "Project name"
+        required: true
+        default: "hetsko"
+        type: string
       infra_config:
         description: "Full infrastructure configuration (JSON)"
         required: true
 
 env:
   TF_IN_AUTOMATION: true
+  PROJECT_NAME: ${{ inputs.project_name }}
 
 jobs:
 # ==========================================================
