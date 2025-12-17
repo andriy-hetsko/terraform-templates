@@ -2,7 +2,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.9.0"
 
-  name = "${var.prefix}-igw"
+  name = var.prefix
   cidr = var.cidr
 
   azs             = var.azs
