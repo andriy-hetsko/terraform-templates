@@ -9,6 +9,11 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "1.6.6"
+        
     - name: Download tfvars
       shell: bash
       run: |
