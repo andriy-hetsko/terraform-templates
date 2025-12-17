@@ -1,3 +1,10 @@
+locals {
+  common_tags = {
+    Project     = var.project_name
+    Environment = var.environment
+    Managed   = "terraform"
+  }
+}
 resource "aws_security_group" "alb" {
   name   = "${var.project_name}-alb-sg"
   vpc_id = var.vpc_id
@@ -22,11 +29,12 @@ resource "aws_security_group" "alb" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-    tags = {
-    Project     = var.project_name
-    Environment = var.environment
-    Managed = "terraform"
-  }
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.project_name}-alb-sg"
+    }
+  )
 }
 
 resource "aws_security_group" "ecs" {
@@ -46,11 +54,12 @@ resource "aws_security_group" "ecs" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-    tags = {
-    Project     = var.project_name
-    Environment = var.environment
-    Managed = "terraform"
-  }
+  tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.project_name}-ecs-sg"
+    }
+  )
 }
 
 resource "aws_security_group" "ec2" {
@@ -72,11 +81,12 @@ resource "aws_security_group" "ec2" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Project     = var.project_name
-    Environment = var.environment
-    Managed = "terraform"
-  }
+tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.project_name}-ec2-sg"
+    }
+  )
 }
 
 resource "aws_security_group" "postgres" {
@@ -107,10 +117,12 @@ resource "aws_security_group" "postgres" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Project     = var.project_name
-    Environment = var.environment
-  }
+ tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.project_name}-postgres-sg"
+    }
+  )
 }
 
 resource "aws_security_group" "rds" {
@@ -141,8 +153,10 @@ resource "aws_security_group" "rds" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Project     = var.project_name
-    Environment = var.environment
-  }
+tags = merge(
+    local.common_tags,
+    {
+      Name = "${var.project_name}-rds-sg"
+    }
+  )
 }
