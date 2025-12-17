@@ -7,7 +7,7 @@ on:
         required: true
 
 jobs:
-  infra:
+  Infrastructure:
     runs-on: ubuntu-latest
 
     env:
@@ -28,10 +28,12 @@ jobs:
           echo '${{ inputs.infra_config }}' | jq .
 
       - name: Build terraform.tfvars.json
+        env:
+         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+         
         run: |
             jq '
             {
-                
                 # ------------------
                 # Project
                 # ------------------
@@ -121,12 +123,9 @@ jobs:
             }
             | with_entries(select(.value != null))
             ' <<< '${{ inputs.infra_config }}' > terraform.tfvars.json
-        env:
-         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-
 
 # ------------------------
-# Extract common vars
+# Export common vars
 # ------------------------
       - name: Export common variables
         run: |
