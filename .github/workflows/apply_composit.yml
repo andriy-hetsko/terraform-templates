@@ -6,12 +6,17 @@ on:
       project_name:
         description: "Project name"
         required: true
-        default: "hetsko"
+        default: "hetsko-json"
         type: string
       aws_region:
         description: "AWS Region"
         required: true
         default: "us-east-2"
+        type: string
+      environment:
+        description: "Environment (dev/stage/prod)"
+        required: true
+        default: "dev"
         type: string
       infra_config:
         description: "Full infrastructure configuration (JSON)"
@@ -21,6 +26,7 @@ env:
   TF_IN_AUTOMATION: true
   PROJECT_NAME: ${{ inputs.project_name }}
   AWS_REGION: ${{ inputs.aws_region }}
+  ENVIRONMENT: ${{ inputs.environment }}
 
 jobs:
 # ==========================================================
