@@ -1,5 +1,4 @@
-name: Full Infrastructure Provision json
-
+name: Full Infrastructure Provision (JSON)
 on:
   workflow_dispatch:
     inputs:
@@ -13,17 +12,24 @@ jobs:
 
     env:
       TF_IN_AUTOMATION: true
+    
+    strategy:
+        matrix:
+            module:
+                - vps
+                - security-group
+
 
     steps:
-      # ------------------------
-      # Checkout
-      # ------------------------
+# ------------------------
+# Checkout
+# ------------------------
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ------------------------
-      # Validate JSON
-      # ------------------------
+# ------------------------
+# Validate JSON
+# ------------------------
       - name: Validate infra_config JSON
         run: |
           echo '${{ inputs.infra_config }}' | jq .
@@ -116,7 +122,7 @@ jobs:
                 (if .database.ec2.enabled then .database.ec2.volume_size else null end),
 
                 # ------------------
-                # Secret (injected)
+                # Secret (injected )
                 # ------------------
                 db_password: env.DB_PASSWORD
             }
@@ -126,18 +132,18 @@ jobs:
          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
 
-      # ------------------------
-      # Extract common vars
-      # ------------------------
+# ------------------------
+# Extract common vars
+# ------------------------
       - name: Export common variables
         run: |
             echo "PROJECT_NAME=$(echo '${{ inputs.infra_config }}' | jq -r .project.name)" >> $GITHUB_ENV
             echo "ENVIRONMENT=$(echo '${{ inputs.infra_config }}' | jq -r .project.environment)" >> $GITHUB_ENV
             echo "AWS_REGION=$(echo '${{ inputs.infra_config }}' | jq -r .project.aws_region)" >> $GITHUB_ENV
 
-      # ------------------------
-      # AWS Credentials
-      # ------------------------
+# ------------------------
+# AWS Credentials
+# ------------------------
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -145,17 +151,17 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # ------------------------
-      # Setup Terraform
-      # ------------------------
+# ------------------------
+# Setup Terraform
+# ------------------------
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.6.6"
 
-      # -------------------------------------------
-      # Bootstrap backend bucket if needed
-      # -------------------------------------------
+# -------------------------------------------
+# Bootstrap backend bucket if needed
+# -------------------------------------------
       - name: Check backend bucket
         id: check_bucket
         run: |
@@ -174,133 +180,150 @@ jobs:
           terraform init
           terraform apply -auto-approve
 
-      # -------------------------------------------
-      # Upload tfvars to S3
-      # -------------------------------------------
+# -------------------------------------------
+# Upload tfvars to S3
+# -------------------------------------------
       - name: Upload tfvars to S3
         run: |
           aws s3 cp terraform.tfvars.json \
             s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json
 
-      # ===========================================
-      # VPC
-      # ===========================================
-      - name: Deploy VPC
-        working-directory: ./micro-project/vpc
+
+# ===========================================
+# VPC
+# ===========================================
+      - name: Deploy ${{ matrix.module }}
+        working-directory: ./micro-project/${{ matrix.module }}
         run: |
           aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
           terraform init \
             -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
-            -backend-config="key=${ENVIRONMENT}/vpc/terraform.tfstate" \
+            -backend-config="key=${ENVIRONMENT}/${{ matrix.module }}/terraform.tfstate" \
             -backend-config="region=${AWS_REGION}"
           terraform apply -auto-approve
 
-      # ===========================================
-      # Security Group
-      # ===========================================
-      - name: Deploy Security Group
-        working-directory: ./micro-project/security-group
-        run: |
-          aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
-          terraform init \
-            -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
-            -backend-config="key=${ENVIRONMENT}/security-group/terraform.tfstate" \
-            -backend-config="region=${AWS_REGION}"
-          terraform apply -auto-approve
 
-      # ===========================================
-      # ALB
-      # ===========================================
-      - name: Deploy ALB
-        working-directory: ./micro-project/alb
-        run: |
-          aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
-          terraform init \
-            -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
-            -backend-config="key=${ENVIRONMENT}/alb/terraform.tfstate" \
-            -backend-config="region=${AWS_REGION}"
-          terraform apply -auto-approve
-       # -------------------------------------------
-       # IAM ECS (if selected)
-       # -------------------------------------------
-      - name: Download tfvars from S3 (IAM ECS)
-        if: fromJson(inputs.infra_config).compute.ecs.enabled == true
-        working-directory: ./micro-project/iam-ecs
-        run: |
-           aws s3 cp \
-           s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
-           terraform init \
-             -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
-             -backend-config="key=${ENVIRONMENT}/iam-ecs/terraform.tfstate" \
-             -backend-config="region=${AWS_REGION}" \
-             -backend-config="encrypt=true"
-           terraform apply -auto-approve
+# # ===========================================
+# # VPC
+# # ===========================================
+#       - name: Deploy VPC
+#         working-directory: ./micro-project/vpc
+#         run: |
+#           aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
+#           terraform init \
+#             -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+#             -backend-config="key=${ENVIRONMENT}/vpc/terraform.tfstate" \
+#             -backend-config="region=${AWS_REGION}"
+#           terraform apply -auto-approve
 
-      # ===========================================
-      # ECS (if selected)
-      # ===========================================
-      - name: Deploy ECS
-        if: fromJson(inputs.infra_config).compute.ecs.enabled == true
-        working-directory: ./micro-project/ecs
-        run: |
-          aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
-          terraform init \
-            -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
-            -backend-config="key=${ENVIRONMENT}/ecs/terraform.tfstate" \
-            -backend-config="region=${AWS_REGION}"
-          terraform apply -auto-approve
-     # -------------------------------------------
-     # IAM EC2 (if selected)
-     # -------------------------------------------
-      - name: Download tfvars from S3 (IAM EC2)
-        if: fromJson(inputs.infra_config).compute.ec2.enabled == true
-        working-directory: ./micro-project/iam-ec2
-        run: |
-          aws s3 cp \
-          s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
-          terraform init \
-             -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
-             -backend-config="key=${ENVIRONMENT}/iam-ec2/terraform.tfstate" \
-             -backend-config="region=${AWS_REGION}" \
-             -backend-config="encrypt=true"
-          terraform apply -auto-approve
+# # ===========================================
+# # Security Group
+# # ===========================================
+#       - name: Deploy Security Group
+#         working-directory: ./micro-project/security-group
+#         run: |
+#           aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
+#           terraform init \
+#             -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+#             -backend-config="key=${ENVIRONMENT}/security-group/terraform.tfstate" \
+#             -backend-config="region=${AWS_REGION}"
+#           terraform apply -auto-approve
 
-      # ===========================================
-      # EC2 (if selected)
-      # ===========================================
-      - name: Deploy EC2
-        if: fromJson(inputs.infra_config).compute.ec2.enabled == true
-        working-directory: ./micro-project/ec2
-        run: |
-          aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
-          terraform init \
-            -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
-            -backend-config="key=${ENVIRONMENT}/ec2/terraform.tfstate" \
-            -backend-config="region=${AWS_REGION}"
-          terraform apply -auto-approve
-      # ===========================================
-      # EC2 Postgres (if selected)
-      # ===========================================
-      - name: Deploy EC2 Postgres
-        if: fromJson(inputs.infra_config).database.ec2.enabled == true
-        working-directory: ./micro-project/ec2-postgres
-        run: |
-          aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
-          terraform init \
-            -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
-            -backend-config="key=${ENVIRONMENT}/ec2-postgres/terraform.tfstate" \
-            -backend-config="region=${AWS_REGION}"
-          terraform apply -auto-approve
-      # ===========================================
-      # RDS Postgres (if selected)
-      # ===========================================
-      - name: Deploy RDS Postgres
-        if: fromJson(inputs.infra_config).database.rds.enabled == true
-        working-directory: ./micro-project/rds-postgres
-        run: |
-          aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
-          terraform init \
-            -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
-            -backend-config="key=${ENVIRONMENT}/rds-postgres/terraform.tfstate" \
-            -backend-config="region=${AWS_REGION}"
-          terraform apply -auto-approve
+# # ===========================================
+# # ALB
+# # ===========================================
+#       - name: Deploy ALB
+#         working-directory: ./micro-project/alb
+#         run: |
+#           aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
+#           terraform init \
+#             -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+#             -backend-config="key=${ENVIRONMENT}/alb/terraform.tfstate" \
+#             -backend-config="region=${AWS_REGION}"
+#           terraform apply -auto-approve
+# # -------------------------------------------
+# # IAM ECS (if selected ECS)
+# # -------------------------------------------
+#       - name: Download tfvars from S3 (IAM ECS)
+#         if: fromJson(inputs.infra_config).compute.ecs.enabled == true
+#         working-directory: ./micro-project/iam-ecs
+#         run: |
+#            aws s3 cp \
+#            s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
+#            terraform init \
+#              -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+#              -backend-config="key=${ENVIRONMENT}/iam-ecs/terraform.tfstate" \
+#              -backend-config="region=${AWS_REGION}" \
+#              -backend-config="encrypt=true"
+#            terraform apply -auto-approve
+
+# # ===========================================
+# # ECS (if selected)
+# # ===========================================
+#       - name: Deploy ECS
+#         if: fromJson(inputs.infra_config).compute.ecs.enabled == true
+#         working-directory: ./micro-project/ecs
+#         run: |
+#           aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
+#           terraform init \
+#             -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+#             -backend-config="key=${ENVIRONMENT}/ecs/terraform.tfstate" \
+#             -backend-config="region=${AWS_REGION}"
+#           terraform apply -auto-approve
+# # -------------------------------------------
+# # IAM EC2 (if selected EC2)
+# # -------------------------------------------
+#       - name: Download tfvars from S3 (IAM EC2)
+#         if: fromJson(inputs.infra_config).compute.ec2.enabled == true
+#         working-directory: ./micro-project/iam-ec2
+#         run: |
+#           aws s3 cp \
+#           s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
+#           terraform init \
+#              -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+#              -backend-config="key=${ENVIRONMENT}/iam-ec2/terraform.tfstate" \
+#              -backend-config="region=${AWS_REGION}" \
+#              -backend-config="encrypt=true"
+#           terraform apply -auto-approve
+
+# # ===========================================
+# # EC2 (if selected)
+# # ===========================================
+#       - name: Deploy EC2
+#         if: fromJson(inputs.infra_config).compute.ec2.enabled == true
+#         working-directory: ./micro-project/ec2
+#         run: |
+#           aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
+#           terraform init \
+#             -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+#             -backend-config="key=${ENVIRONMENT}/ec2/terraform.tfstate" \
+#             -backend-config="region=${AWS_REGION}"
+#           terraform apply -auto-approve
+
+# # ===========================================
+# # EC2 Postgres (if selected)
+# # ===========================================
+#       - name: Deploy EC2 Postgres
+#         if: fromJson(inputs.infra_config).database.ec2.enabled == true
+#         working-directory: ./micro-project/ec2-postgres
+#         run: |
+#           aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
+#           terraform init \
+#             -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+#             -backend-config="key=${ENVIRONMENT}/ec2-postgres/terraform.tfstate" \
+#             -backend-config="region=${AWS_REGION}"
+#           terraform apply -auto-approve
+
+# # ===========================================
+# # RDS Postgres (if selected)
+# # ===========================================
+#       - name: Deploy RDS Postgres
+#         if: fromJson(inputs.infra_config).database.rds.enabled == true
+#         working-directory: ./micro-project/rds-postgres
+#         run: |
+#           aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
+#           terraform init \
+#             -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+#             -backend-config="key=${ENVIRONMENT}/rds-postgres/terraform.tfstate" \
+#             -backend-config="region=${AWS_REGION}"
+#           terraform apply -auto-approve

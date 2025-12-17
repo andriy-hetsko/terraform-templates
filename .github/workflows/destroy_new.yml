@@ -58,7 +58,7 @@ jobs:
               with:
                   terraform_version: "1.6.6"
 # -------------------------------------------
-#  INIT + DESYTROY EC2 Postgres
+# DESYTROY EC2 Postgres
 # -------------------------------------------
             - name: Check if RDS state exists
               id: rds_state
@@ -76,7 +76,7 @@ jobs:
                 aws s3 cp \
                     s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json \
                     terraform.auto.tfvars.json
-            - name: Terraform Init Postgres (with backend config)
+            - name: Destroy Postgres (with backend config)
               if: steps.rds_state.outputs.exists == 'true'
               working-directory: ./micro-project/rds-postgres
               run: |
@@ -92,7 +92,7 @@ jobs:
               run: terraform destroy -auto-approve 
 
 # -------------------------------------------
-#  INIT + DESYTROY EC2 Postgres
+# DESYTROY EC2 Postgres
 # -------------------------------------------
             - name: Check if Postgres state exists
               id: postgres_state
@@ -103,7 +103,7 @@ jobs:
                     echo "exists=false" >> $GITHUB_OUTPUT
                 fi
 
-            - name: Download tfvars from S3
+            - name: Destroy EC2-Postgres
               if: steps.postgres_state.outputs.exists == 'true'
               working-directory: ./micro-project/ec2-postgres
               run: |
@@ -119,7 +119,7 @@ jobs:
 
 
 # -------------------------------------------
-#  INIT + DESYTROY EC2
+#  DESYTROY EC2
 # -------------------------------------------
             - name: Check if EC2 state exists
               id: ec2_state
@@ -135,9 +135,8 @@ jobs:
               working-directory: ./micro-project/ec2
               run: |
                 aws s3 cp \
-                    s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json \
-                    terraform.auto.tfvars.json
-            - name: Terraform Init EC2 (with backend config)
+                    s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
+            - name: Destroy EC2 (with backend config)
               if: steps.ec2_state.outputs.exists == 'true'
               working-directory: ./micro-project/ec2
               run: |
@@ -146,16 +145,12 @@ jobs:
                     -backend-config="key=${ENVIRONMENT}/ec2/terraform.tfstate" \
                     -backend-config="region=${AWS_REGION}" \
                     -backend-config="encrypt=true"
-
-            - name: Terraform Destroy EC2
-              if: steps.ec2_state.outputs.exists == 'true'
-              working-directory: ./micro-project/ec2
-              run: terraform destroy -auto-approve 
+                terraform destroy -auto-approve 
 
 
 
 # -------------------------------------------
-#  INIT + DESYTROY IAM-EC2
+#  DESYTROY IAM-EC2
 # -------------------------------------------
             - name: Check if IAM-EC2 state exists
               id: iam_ec2_state
@@ -171,9 +166,8 @@ jobs:
               working-directory: ./micro-project/iam-ec2
               run: |
                 aws s3 cp \
-                    s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json \
-                    terraform.auto.tfvars.json
-            - name: Terraform Init IAM-EC2 (with backend config)
+                    s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
+            - name: Destroy IAM-EC2 (with backend config)
               if: steps.iam_ec2_state.outputs.exists == 'true'
               working-directory: ./micro-project/iam-ec2
               run: |
@@ -182,15 +176,11 @@ jobs:
                     -backend-config="key=${ENVIRONMENT}/iam-ec2/terraform.tfstate" \
                     -backend-config="region=${AWS_REGION}" \
                     -backend-config="encrypt=true"
-
-            - name: Terraform Destroy IAM-EC2
-              if: steps.iam_ec2_state.outputs.exists == 'true'
-              working-directory: ./micro-project/iam-ec2
-              run: terraform destroy -auto-approve 
+                terraform destroy -auto-approve 
 
 
 # -------------------------------------------
-#  INIT + DESYTROY ECS
+#  DESYTROY ECS
 # -------------------------------------------
             - name: Check if ECS state exists
               id: ecs_state
@@ -206,9 +196,8 @@ jobs:
               working-directory: ./micro-project/ecs
               run: |
                 aws s3 cp \
-                    s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json \
-                    terraform.auto.tfvars.json
-            - name: Terraform Init ECS (with backend config)
+                    s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json  terraform.auto.tfvars.json
+            - name: Destroy ECS (with backend config)
               if: steps.ecs_state.outputs.exists == 'true'
               working-directory: ./micro-project/ecs
               run: |
@@ -217,15 +206,11 @@ jobs:
                     -backend-config="key=${ENVIRONMENT}/ecs/terraform.tfstate" \
                     -backend-config="region=${AWS_REGION}" \
                     -backend-config="encrypt=true"
-
-            - name: Terraform Destroy ECS
-              if: steps.ecs_state.outputs.exists == 'true'
-              working-directory: ./micro-project/ecs
-              run: terraform destroy -auto-approve 
+                terraform destroy -auto-approve 
 
 
 # -------------------------------------------
-#  INIT + DESYTROY IAM-ECS
+#  DESYTROY IAM-ECS
 # -------------------------------------------
             - name: Check if IAM-ECS state exists
               id: iam_ecs_state
@@ -241,9 +226,8 @@ jobs:
               working-directory: ./micro-project/iam-ecs
               run: |
                 aws s3 cp \
-                    s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json \
-                    terraform.auto.tfvars.json
-            - name: Terraform Init IAM-ECS (with backend config)
+                    s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json  terraform.auto.tfvars.json
+            - name: Destroy IAM-ECS (with backend config)
               if: steps.iam_ecs_state.outputs.exists == 'true'
               working-directory: ./micro-project/iam-ecs
               run: |
@@ -252,22 +236,17 @@ jobs:
                     -backend-config="key=${ENVIRONMENT}/iam-ecs/terraform.tfstate" \
                     -backend-config="region=${AWS_REGION}" \
                     -backend-config="encrypt=true"
-
-            - name: Terraform Destroy IAM-ECS
-              if: steps.iam_ecs_state.outputs.exists == 'true'
-              working-directory: ./micro-project/iam-ecs
-              run: terraform destroy -auto-approve 
+                terraform destroy -auto-approve 
 
 # -------------------------------------------
-#  INIT + DESYTROY ALB
+#  DESYTROY ALB
 # -------------------------------------------
             - name: Download tfvars from S3
               working-directory: ./micro-project/alb
               run: |
                 aws s3 cp \
-                    s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json \
-                    terraform.auto.tfvars.json
-            - name: Terraform Init ALB (with backend config)
+                    s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
+            - name: Destroy ALB (with backend config)
               working-directory: ./micro-project/alb
               run: |
                 terraform init \
@@ -275,22 +254,18 @@ jobs:
                     -backend-config="key=${ENVIRONMENT}/alb/terraform.tfstate" \
                     -backend-config="region=${AWS_REGION}" \
                     -backend-config="encrypt=true"
-
-            - name: Terraform Destroy ALB
-              working-directory: ./micro-project/alb
-              run: terraform destroy -auto-approve 
+                terraform destroy -auto-approve 
 
 
 # -------------------------------------------
-#  INIT + DESYTROY SG
+#  DESYTROY SG
 # -------------------------------------------
             - name: Download tfvars from S3
               working-directory: ./micro-project/security-group
               run: |
                 aws s3 cp \
-                    s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json \
-                    terraform.auto.tfvars.json
-            - name: Terraform Init SG (with backend config)
+                    s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json  terraform.auto.tfvars.json
+            - name: Destroy SG (with backend config)
               working-directory: ./micro-project/security-group
               run: |
                 terraform init \
@@ -298,21 +273,17 @@ jobs:
                     -backend-config="key=${ENVIRONMENT}/security-group/terraform.tfstate" \
                     -backend-config="region=${AWS_REGION}" \
                     -backend-config="encrypt=true"
-
-            - name: Terraform Destroy SG
-              working-directory: ./micro-project/security-group
-              run: terraform destroy -auto-approve 
+                terraform destroy -auto-approve 
 
 # -------------------------------------------
-#  INIT + DESYTROY VPC
+#  DESYTROY VPC
 # -------------------------------------------
             - name: Download tfvars from S3
               working-directory: ./micro-project/vpc
               run: |
                 aws s3 cp \
-                    s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json \
-                    terraform.auto.tfvars.json
-            - name: Terraform Init VPC (with backend config)
+                    s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json  terraform.auto.tfvars.json
+            - name: Destroy VPC (with backend config)
               working-directory: ./micro-project/vpc
               run: |
                 terraform init \
@@ -320,7 +291,4 @@ jobs:
                     -backend-config="key=${ENVIRONMENT}/vpc/terraform.tfstate" \
                     -backend-config="region=${AWS_REGION}" \
                     -backend-config="encrypt=true"
-
-            - name: Terraform Destroy VPC
-              working-directory: ./micro-project/vpc
-              run: terraform destroy -auto-approve 
+                terraform destroy -auto-approve 
