@@ -2,8 +2,8 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.9.0"
 
-  name = var.prefix
-  cidr = var.prefix
+  name = "${var.prefix}-igw"
+  cidr = var.cidr
 
   azs             = var.azs
   public_subnets  = var.public_subnets
@@ -20,7 +20,7 @@ module "vpc" {
   tags = {
     Project     = var.project_name
     Environment = var.environment
-    Managed = "terraform"
+    Managed     = "terraform"
   }
 }
 
