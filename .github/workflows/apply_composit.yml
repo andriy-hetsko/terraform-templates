@@ -1,0 +1,284 @@
+name: Apply (Composite)
+
+on:
+  workflow_dispatch:
+    inputs:
+      infra_config:
+        description: "Full infrastructure configuration (JSON)"
+        required: true
+
+env:
+  TF_IN_AUTOMATION: true
+
+jobs:
+# ==========================================================
+# BOOTSTRAP
+# ==========================================================
+  bootstrap:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate infra_config JSON
+        run: echo '${{ inputs.infra_config }}' | jq .
+
+      - name: Build terraform.tfvars.json
+        run: |
+           jq '
+            {
+                
+                # ------------------
+                # Project
+                # ------------------
+                project_name: .project.name,
+                environment:  .project.environment,
+                aws_region:   .project.aws_region,
+                backend_bucket: (.project.name + "-backend-tf"),
+
+                # ------------------
+                # Network
+                # ------------------
+                prefix:          .project.name,
+                cidr:            .network.cidr,
+                azs:             .network.azs,
+                public_subnets:  .network.public_subnets,
+                private_subnets: .network.private_subnets,
+
+                # ------------------
+                # Compute selector
+                # ------------------
+                compute_type:
+                (if .compute.ecs.enabled then "ecs"
+                elif .compute.ec2.enabled then "ec2"
+                else null end),
+
+                # ------------------
+                # ALB
+                # ------------------
+                listener_port:    .alb.listener_port,
+                target_port:      .alb.target_port,
+                healthcheck_path: .alb.healthcheck_path,
+
+                # ------------------
+                # EC2 compute
+                # ------------------
+                instance_type:
+                (if .compute.ec2.enabled then .compute.ec2.instance_type else null end),
+                key_name:
+                (if .compute.ec2.enabled then .compute.ec2.key_name else null end),
+
+                # ------------------
+                # Database selector
+                # ------------------
+                data_base_type:
+                (if .database.rds.enabled then "RDS"
+                elif .database.ec2.enabled then "ec2"
+                else null end),
+
+                # ------------------
+                # RDS Postgres
+                # ------------------
+                db_name:
+                (if .database.rds.enabled then .database.rds.db_name else null end),
+                db_username:
+                (if .database.rds.enabled then .database.rds.db_username else null end),
+                db_instance_class:
+                (if .database.rds.enabled then .database.rds.db_instance_class else null end),
+                allocated_storage:
+                (if .database.rds.enabled then .database.rds.allocated_storage else null end),
+                max_allocated_storage:
+                (if .database.rds.enabled then .database.rds.max_allocated_storage else null end),
+                engine_version:
+                (if .database.rds.enabled then .database.rds.engine_version else null end),
+                multi_az:
+                (if .database.rds.enabled then .database.rds.multi_az else null end),
+                backup_retention_period:
+                (if .database.rds.enabled then .database.rds.backup_retention_period else null end),
+                skip_final_snapshot:
+                (if .database.rds.enabled then .database.rds.skip_final_snapshot else null end),
+                deletion_protection:
+                (if .database.rds.enabled then .database.rds.deletion_protection else null end),
+
+                # ------------------
+                # EC2 Postgres
+                # ------------------
+                db_engine:
+                (if .database.ec2.enabled then .database.ec2.engine else null end),
+                db_instance_type:
+                (if .database.ec2.enabled then .database.ec2.instance_type else null end),
+                db_volume_size:
+                (if .database.ec2.enabled then .database.ec2.volume_size else null end),
+
+                # ------------------
+                # Secret (injected )
+                # ------------------
+                db_password: env.DB_PASSWORD
+            }
+            | with_entries(select(.value != null))
+            ' <<< '${{ inputs.infra_config }}' > terraform.tfvars.json
+        env:
+         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
+      - name: Export common vars
+        run: |
+            echo "PROJECT_NAME=$(echo '${{ inputs.infra_config }}' | jq -r .project.name)" >> $GITHUB_ENV
+            echo "ENVIRONMENT=$(echo '${{ inputs.infra_config }}' | jq -r .project.environment)" >> $GITHUB_ENV
+            echo "AWS_REGION=$(echo '${{ inputs.infra_config }}' | jq -r .project.aws_region)" >> $GITHUB_ENV
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.6.6"
+# -------------------------------------------
+# Bootstrap backend bucket if needed
+# -------------------------------------------
+      - name: Check backend bucket
+        id: check_bucket
+        run: |
+            if aws s3api head-bucket --bucket "${PROJECT_NAME}-backend-tf" 2>/dev/null; then
+                echo "exists=true" >> $GITHUB_OUTPUT
+            else
+                echo "exists=false" >> $GITHUB_OUTPUT
+            fi
+      - name: Create backend bucket
+        if: steps.check_bucket.outputs.exists == 'false'
+        working-directory: ./micro-project/backend
+        run: |
+          echo "backend_bucket_name = \"${PROJECT_NAME}-backend-tf\"" > backend.auto.tfvars
+          echo "aws_region = \"${AWS_REGION}\"" >> backend.auto.tfvars
+          terraform init
+          terraform apply -auto-approve
+
+# -------------------------------------------
+# Upload tfvars to S3
+# -------------------------------------------
+      - name: Upload tfvars to S3
+        run: |
+          aws s3 cp terraform.tfvars.json \
+            s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json
+
+# ==========================================================
+# VPC
+# ==========================================================
+  vpc:
+    runs-on: ubuntu-latest
+    needs: bootstrap
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/terraform-module
+        with:
+          module: vpc
+          state_key: vpc
+
+# ==========================================================
+# SECURITY GROUP
+# ==========================================================
+  security-group:
+    runs-on: ubuntu-latest
+    needs: vpc
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/terraform-module
+        with:
+          module: security-group
+          state_key: security-group
+
+# # ==========================================================
+# # ALB
+# # ==========================================================
+#   alb:
+#     runs-on: ubuntu-latest
+#     needs: security-group
+
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: ./.github/actions/terraform-module
+#         with:
+#           module: alb
+#           state_key: alb
+
+# # ==========================================================
+# # IAM ECS
+# # ==========================================================
+#   iam-ecs:
+#     if: fromJson(inputs.infra_config).compute.ecs.enabled == true
+#     runs-on: ubuntu-latest
+#     needs: alb
+
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: ./.github/actions/terraform-module
+#         with:
+#           module: iam-ecs
+#           state_key: iam-ecs
+
+# # ==========================================================
+# # ECS
+# # ==========================================================
+#   ecs:
+#     if: fromJson(inputs.infra_config).compute.ecs.enabled == true
+#     runs-on: ubuntu-latest
+#     needs: iam-ecs
+
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: ./.github/actions/terraform-module
+#         with:
+#           module: ecs
+#           state_key: ecs
+
+# # ==========================================================
+# # IAM EC2
+# # ==========================================================
+#   iam-ec2:
+#     if: fromJson(inputs.infra_config).compute.ec2.enabled == true
+#     runs-on: ubuntu-latest
+#     needs: alb
+
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: ./.github/actions/terraform-module
+#         with:
+#           module: iam-ec2
+#           state_key: iam-ec2
+
+# # ==========================================================
+# # EC2
+# # ==========================================================
+#   ec2:
+#     if: fromJson(inputs.infra_config).compute.ec2.enabled == true
+#     runs-on: ubuntu-latest
+#     needs: iam-ec2
+
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: ./.github/actions/terraform-module
+#         with:
+#           module: ec2
+#           state_key: ec2
+
+# # ==========================================================
+# # RDS POSTGRES
+# # ==========================================================
+#   rds-postgres:
+#     if: fromJson(inputs.infra_config).database.rds.enabled == true
+#     runs-on: ubuntu-latest
+#     needs: alb
+
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: ./.github/actions/terraform-module
+#         with:
+#           module: rds-postgres
+#           state_key: rds-postgres

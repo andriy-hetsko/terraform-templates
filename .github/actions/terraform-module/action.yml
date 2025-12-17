@@ -1,0 +1,31 @@
+name: Terraform Module Apply
+description: Apply single terraform module with remote backend
+inputs:
+  module:
+    required: true
+  state_key:
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Download tfvars
+      shell: bash
+      run: |
+        aws s3 cp \
+          s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json \
+          terraform.auto.tfvars.json
+
+    - name: Terraform Init
+      shell: bash
+      working-directory: micro-project/${{ inputs.module }}
+      run: |
+        terraform init \
+          -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
+          -backend-config="key=${ENVIRONMENT}/${{ inputs.state_key }}/terraform.tfstate" \
+          -backend-config="region=${AWS_REGION}"
+
+    - name: Terraform Apply
+      shell: bash
+      working-directory: micro-project/${{ inputs.module }}
+      run: terraform apply -auto-approve
