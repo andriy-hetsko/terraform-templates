@@ -175,7 +175,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Configure AWS credentials
+      - name: Export common vars
+        run: |
+            echo "PROJECT_NAME=$(echo '${{ inputs.infra_config }}' | jq -r .project.name)" >> $GITHUB_ENV
+            echo "ENVIRONMENT=$(echo '${{ inputs.infra_config }}' | jq -r .project.environment)" >> $GITHUB_ENV
+            echo "AWS_REGION=$(echo '${{ inputs.infra_config }}' | jq -r .project.aws_region)" >> $GITHUB_ENV      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
