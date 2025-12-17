@@ -178,7 +178,7 @@ jobs:
       - name: Download tfvars artifact
         run: |
             aws s3 cp \
-                s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json \
+                s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json \
                 terraform.auto.tfvars.json
       - name: Export common variables
         run: |
