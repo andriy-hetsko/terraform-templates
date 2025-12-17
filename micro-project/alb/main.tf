@@ -1,23 +1,7 @@
 locals {
   alb_target_type = var.compute_type == "ecs" ? "ip" : "instance"
 }
-data "terraform_remote_state" "vpc" {
-  backend = "s3"
-  config = {
-    bucket = var.backend_bucket
-    key    = "${var.environment}/vpc/terraform.tfstate"
-    region = var.aws_region
-  }
-}
 
-data "terraform_remote_state" "sg" {
-  backend = "s3"
-  config = {
-    bucket = var.backend_bucket
-    key    = "${var.environment}/security-group/terraform.tfstate"
-    region = var.aws_region
-  }
-}
 
 module "alb" {
   source = "../modules/alb"

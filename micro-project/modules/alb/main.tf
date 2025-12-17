@@ -5,11 +5,9 @@ resource "aws_lb" "this" {
   security_groups    = [var.alb_sg_id]
   subnets            = var.public_subnets
 
-  tags = {
-    Project     = var.project_name
-    Environment = var.environment
-    Managed = "terraform"
-  }
+  tags = merge(
+    local.common_tags
+  )
 }
 
 resource "aws_lb_target_group" "this" {
@@ -30,11 +28,9 @@ resource "aws_lb_target_group" "this" {
     unhealthy_threshold = 3
   }
 
-  tags = {
-    Project     = var.project_name
-    Environment = var.environment
-    Managed = "terraform"
-  }
+  tags = merge(
+    local.common_tags
+  )
 }
 
 resource "aws_lb_listener" "http" {
@@ -46,4 +42,7 @@ resource "aws_lb_listener" "http" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.this.arn
   }
+    tags = merge(
+    local.common_tags
+  )
 }

@@ -2,11 +2,9 @@ resource "aws_db_subnet_group" "this" {
   name       = "${var.project_name}-${var.environment}-rds-subnets"
   subnet_ids = var.private_subnet_ids
 
-  tags = {
-    Project     = var.project_name
-    Environment = var.environment
-    Managed     = "terraform"
-  }
+  tags = merge(
+    local.common_tags
+  )
 }
 
 resource "aws_db_instance" "this" {
@@ -35,9 +33,7 @@ resource "aws_db_instance" "this" {
   deletion_protection = var.deletion_protection
   skip_final_snapshot = var.skip_final_snapshot
 
-  tags = {
-    Project     = var.project_name
-    Environment = var.environment
-    Managed     = "terraform"
-  }
+  tags = merge(
+    local.common_tags
+  )
 }

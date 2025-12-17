@@ -1,38 +1,3 @@
-data "terraform_remote_state" "vpc" {
-  backend = "s3"
-  config = {
-    bucket = var.backend_bucket
-    key    = "${var.environment}/vpc/terraform.tfstate"
-    region = var.aws_region
-  }
-}
-
-data "terraform_remote_state" "sg" {
-  backend = "s3"
-  config = {
-    bucket = var.backend_bucket
-    key    = "${var.environment}/security-group/terraform.tfstate"
-    region = var.aws_region
-  }
-}
-
-data "terraform_remote_state" "iam_ec2" {
-  backend = "s3"
-  config = {
-    bucket = var.backend_bucket
-    key    = "${var.environment}/iam-ec2/terraform.tfstate"
-    region = var.aws_region
-  }
-}
-data "terraform_remote_state" "alb" {
-  backend = "s3"
-  config = {
-    bucket = var.backend_bucket
-    key    = "${var.environment}/alb/terraform.tfstate"
-    region = var.aws_region
-  }
-}
-
 module "ec2" {
   source = "../modules/ec2"
 
@@ -60,18 +25,18 @@ module "ec2" {
     size = 30
     type = "gp3"
   }
-
-  user_data = <<-EOF
-    #!/bin/bash
-    sudo apt-get update
-    curl -fsSL test.docker.com -o get-docker.sh && sh get-docker.sh
-    sudo systemctl enable docker
-    sudo systemctl start docker
-    sudo usermod -aG docker $USER 
-    sudo systemctl enable amazon-ssm-agent
-    sudo systemctl start amazon-ssm-agent
-    sudo docker run -p 3000:80 -d nginx
-  EOF
+  user_data = file("${path.module}/user-data.sh")
+  # user_data = <<-EOF
+  #   #!/bin/bash
+  #   sudo apt-get update
+  #   curl -fsSL test.docker.com -o get-docker.sh && sh get-docker.sh
+  #   sudo systemctl enable docker
+  #   sudo systemctl start docker
+  #   sudo usermod -aG docker $USER 
+  #   sudo systemctl enable amazon-ssm-agent
+  #   sudo systemctl start amazon-ssm-agent
+  #   sudo docker run -p 3000:80 -d nginx
+  # EOF
 }
 
 resource "aws_lb_target_group_attachment" "ec2" {

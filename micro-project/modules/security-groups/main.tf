@@ -1,10 +1,3 @@
-locals {
-  common_tags = {
-    Project     = var.project_name
-    Environment = var.environment
-    Managed   = "terraform"
-  }
-}
 resource "aws_security_group" "alb" {
   name   = "${var.project_name}-alb-sg"
   vpc_id = var.vpc_id
