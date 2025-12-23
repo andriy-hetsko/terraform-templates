@@ -13,6 +13,7 @@ variable "services" {
     cpu             = number
     memory          = number
     desired_count   = number
+    enable_exec      = bool
     healthcheck_path = string
     path_pattern     = string
   }))

@@ -4,7 +4,7 @@ resource "aws_ecs_task_definition" "this" {
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.cpu
   memory                   = var.memory
-
+  
   execution_role_arn = var.execution_role_arn
   task_role_arn      = var.task_role_arn
 
@@ -28,7 +28,7 @@ resource "aws_ecs_service" "this" {
   task_definition = aws_ecs_task_definition.this.arn
   desired_count   = var.desired_count
   launch_type     = "FARGATE"
-
+  enable_execute_command = var.enable_exec 
   network_configuration {
     subnets         = var.private_subnets
     security_groups = [var.ecs_sg_id]

@@ -26,3 +26,7 @@ variable "ecs_sg_id" {
 variable "target_group_arn" {
   type = string
 }
+variable "enable_exec" {
+  type    = bool
+  default = true
+}

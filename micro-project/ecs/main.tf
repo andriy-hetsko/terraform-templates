@@ -24,7 +24,7 @@ module "ecs" {
   cpu             = each.value.cpu
   memory          = each.value.memory
   desired_count   = each.value.desired_count
-
+  enable_exec     = each.value.enable_exec
   execution_role_arn = data.terraform_remote_state.iam_ecs.outputs.execution_role_arn
   task_role_arn      = data.terraform_remote_state.iam_ecs.outputs.task_role_arn
 
