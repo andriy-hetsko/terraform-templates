@@ -1,52 +1,39 @@
-variable "project_name" { 
-    type = string 
-    }
-variable "environment"  { 
-    type = string 
-    }
+variable "project_name" {
+  type = string
+}
+
+variable "environment" {
+  type = string
+}
+
+variable "service_name" {
+  type = string
+}
 
 variable "cluster_name" {
-     type = string 
-     }
+  type = string
+}
 
-variable "container_name"  { 
-    type = string 
-    }
-variable "container_image" { 
-    type = string 
-    }
-variable "container_port"  { 
-    type = number 
-    }
+variable "container_image" {
+  type = string
+}
 
-variable "cpu"    {
-     type = number 
-     }
+variable "container_port" {
+  type = number
+}
+
+variable "cpu" {
+  type = number
+}
+
 variable "memory" {
-     type = number 
-     }
+  type = number
+}
 
 variable "desired_count" {
-  type    = number
-  default = 1
+  type = number
 }
 
-variable "private_subnets" { type = list(string) }
-variable "ecs_sg_id"       { type = string }
-
-variable "target_group_arn" { type = string }
-
-variable "enable_exec" {
-  type    = bool
-  default = true
-}
-
-variable "execution_role_arn" {
-  type        = string
-  description = "ECS task execution role ARN"
-}
-
-variable "task_role_arn" {
-  type        = string
-  description = "ECS task role ARN"
+variable "target_group_arn" {
+  type = string
 }
