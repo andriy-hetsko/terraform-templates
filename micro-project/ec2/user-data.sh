@@ -10,8 +10,8 @@ systemctl start docker
 usermod -aG docker $USER 
 
 #enable ssm
-systemctl enable amazon-ssm-agent
-systemctl start amazon-ssm-agent
+systemctl enable amazon-ssm-agent || true
+systemctl start amazon-ssm-agent || true
 
 #test, start nginx
 docker run -p 3000:80 -d nginx
