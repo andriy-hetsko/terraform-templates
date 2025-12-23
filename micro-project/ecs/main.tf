@@ -32,7 +32,7 @@ resource "aws_ecs_service" "this" {
 
   network_configuration {
     subnets         = var.private_subnets
-    security_groups = [var.ecs_sg_id]
+    security_groups = [data.terraform_remote_state.sg.outputs.ecs_sg_id]
   }
 
   load_balancer {

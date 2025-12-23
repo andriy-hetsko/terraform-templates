@@ -15,6 +15,6 @@ variable "task_role_arn" {}
 variable "execution_role_arn" {}
 
 variable "private_subnets" {}
-variable "ecs_sg_id" {}
+# variable "ecs_sg_id" {}
 variable "target_group_arn" {}
 variable "aws_region" { type = string }
