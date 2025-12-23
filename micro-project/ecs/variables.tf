@@ -1,20 +1,24 @@
-variable "project_name" {}
-variable "environment" {}
-variable "service_name" {}
-variable "cluster_name" {}
+variable "project_name" {
+  type = string
+}
 
-# variable "container_name" {}
-variable "container_image" {}
-variable "container_port" {}
+variable "environment" {
+  type = string
+}
 
-variable "cpu" {}
-variable "memory" {}
-variable "desired_count" {}
+variable "cluster_name" {
+  type = string
+}
 
-# variable "task_role_arn" {}
-# variable "execution_role_arn" {}
-
-variable "private_subnets" {}
-# variable "ecs_sg_id" {}
-variable "target_group_arn" {}
-variable "aws_region" { type = string }
+variable "services" {
+  type = map(object({
+    image           = string
+    container_port  = number
+    cpu             = number
+    memory          = number
+    desired_count   = number
+  }))
+}
+variable "aws_region" {
+  type = string
+}

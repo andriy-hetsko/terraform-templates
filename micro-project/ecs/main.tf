@@ -1,44 +1,19 @@
-resource "aws_ecs_task_definition" "this" {
-  family                   = "${var.project_name}-${var.environment}-${var.service_name}"
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-  cpu                      = var.cpu
-  memory                   = var.memory
-  execution_role_arn       = data.terraform_remote_state.iam_ecs.outputs.execution_role_arn
-  task_role_arn            = data.terraform_remote_state.iam_ecs.outputs.task_role_arn
+module "ecs" {
+  for_each = var.services
 
+  source = "../modules/ecs"
 
-  container_definitions = jsonencode([
-    {
-      name  = var.service_name
-      image = var.container_image
+  project_name = var.project_name
+  environment  = var.environment
 
-      portMappings = [
-        {
-          containerPort = var.container_port
-        }
-      ]
+  service_name = each.key
+  cluster_name = var.cluster_name
 
-      essential = true
-    }
-  ])
-}
+  container_image = each.value.image
+  container_port  = each.value.container_port
+  cpu             = each.value.cpu
+  memory          = each.value.memory
+  desired_count   = each.value.desired_count
 
-resource "aws_ecs_service" "this" {
-  name            = "${var.project_name}-${var.environment}-${var.service_name}"
-  cluster         = var.cluster_name
-  task_definition = aws_ecs_task_definition.this.arn
-  desired_count   = var.desired_count
-  launch_type     = "FARGATE"
-
-  network_configuration {
-    subnets         = var.private_subnets
-    security_groups = [data.terraform_remote_state.sg.outputs.ecs_sg_id]
-  }
-
-  load_balancer {
-    target_group_arn = var.target_group_arn
-    container_name   = var.service_name
-    container_port   = var.container_port
-  }
+  target_group_arn = data.terraform_remote_state.alb.outputs.target_group_arns[each.key]
 }
