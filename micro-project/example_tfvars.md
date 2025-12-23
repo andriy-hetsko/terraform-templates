@@ -1,6 +1,6 @@
 {
   "project": {
-    "name": "hetsko-ec2",
+    "name": "hetsko-ecs",
     "environment": "dev",
     "aws_region": "us-east-2"
   },
@@ -15,7 +15,7 @@
 
   "compute": {
     "ecs": {
-      "enabled": false,
+      "enabled": true,
       "container_image": "nginx:1.25-alpine",
       "app_port": 3000,
       "cpu": 256,
@@ -24,7 +24,7 @@
       "enable_exec": true
     },
     "ec2": {
-      "enabled": true,
+      "enabled": false,
       "instance_type": "t3.micro",
       "key_name": null
     }
@@ -39,7 +39,7 @@
 
   "database": {
     "rds": {
-      "enabled": false,
+      "enabled": true,
       "engine": "postgres",
       "engine_version": "17.2",
       "db_name": "appdb",
@@ -53,7 +53,7 @@
       "deletion_protection": false
     },
     "ec2": {
-      "enabled": true,
+      "enabled": false,
       "engine": "postgres",
       "instance_type": "t3.micro",
       "volume_size": 50

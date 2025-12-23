@@ -73,6 +73,28 @@ jobs:
                 (if .compute.ec2.enabled then .compute.ec2.instance_type else null end),
                 key_name:
                 (if .compute.ec2.enabled then .compute.ec2.key_name else null end),
+                
+                # ------------------
+                # ECS compute
+                # ------------------
+                container_image:
+                (if .compute.ecs.enabled then .compute.ecs.container_image else null end),
+
+                app_port:
+                (if .compute.ecs.enabled then .compute.ecs.app_port else null end),
+
+                cpu:
+                (if .compute.ecs.enabled then .compute.ecs.cpu else null end),
+
+                memory:
+                (if .compute.ecs.enabled then .compute.ecs.memory else null end),
+
+                desired_count:
+                (if .compute.ecs.enabled then .compute.ecs.desired_count else null end),
+
+                enable_exec:
+                (if .compute.ecs.enabled then .compute.ecs.enable_exec else null end),
+
 
                 # ------------------
                 # Database selector
