@@ -34,22 +34,26 @@
 
   "alb": {
     "enabled": true,
-    <!-- "listener_port": 80,
-    "target_port": 3000,
-    "healthcheck_path": "/health" -->
     "services": {
-      "backend": {
-        "port": 80,
+      "api": {
+        "image": "nginx:1.25-alpine",
+        "container_port": 80,
+        "cpu": 256,
+        "memory": 512,
+        "desired_count": 1,
         "healthcheck_path": "/",
         "path_pattern": "/api/*"
       },
       "grafana": {
-        "port": 3000,
-        "healthcheck_path": "/api/health",
-        "path_pattern": "/"
+        "image": "grafana/grafana:10.4.3",
+        "container_port": 3000,
+        "cpu": 256,
+        "memory": 512,
+        "desired_count": 1,
+        "healthcheck_path": "/",
+        "path_pattern": "/grafana/*"
       }
    },
-
   "database": {
     "rds": {
       "enabled": true,
@@ -72,4 +76,5 @@
       "volume_size": 50
     }
   }
+}
 }

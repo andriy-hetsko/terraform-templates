@@ -1,36 +1,8 @@
 resource "aws_lb" "this" {
   name               = "${var.project_name}-${var.environment}-alb"
-  internal           = false
   load_balancer_type = "application"
   security_groups    = [var.alb_sg_id]
   subnets            = var.public_subnets
-
-  tags = merge(
-    local.common_tags
-  )
-}
-
-resource "aws_lb_target_group" "this" {
-  name     = "${var.project_name}-${var.environment}-tg"
-  port     = var.target_port
-  protocol = "HTTP"
-  vpc_id  = var.vpc_id
-  target_type = var.target_type
-
-  health_check {
-    enabled             = true
-    path                = var.healthcheck_path
-    protocol            = "HTTP"
-    matcher             = "200-399"
-    interval            = 30
-    timeout             = 5
-    healthy_threshold   = 2
-    unhealthy_threshold = 3
-  }
-
-  tags = merge(
-    local.common_tags
-  )
 }
 
 resource "aws_lb_listener" "http" {
@@ -39,10 +11,44 @@ resource "aws_lb_listener" "http" {
   protocol          = "HTTP"
 
   default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.this.arn
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Not Found"
+      status_code  = "404"
+    }
   }
-    tags = merge(
-    local.common_tags
-  )
+}
+
+resource "aws_lb_target_group" "this" {
+  for_each = var.services
+
+  name        = "${var.project_name}-${var.environment}-${each.key}"
+  port        = each.value.container_port
+  protocol    = "HTTP"
+  vpc_id      = var.vpc_id
+  target_type = var.target_type
+
+  health_check {
+    path = each.value.healthcheck_path
+  }
+}
+
+resource "aws_lb_listener_rule" "this" {
+  for_each = var.services
+
+  listener_arn = aws_lb_listener.http.arn
+  priority     = 10 + index(keys(var.services), each.key)
+
+  condition {
+    path_pattern {
+      values = [each.value.path_pattern]
+    }
+  }
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.this[each.key].arn
+  }
 }

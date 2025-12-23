@@ -1,41 +1,20 @@
-variable "project_name" { 
-    type = string 
-    }
-variable "environment"  {
-     type = string 
-     }
+variable "project_name" {}
+variable "environment" {}
+variable "service_name" {}
+variable "cluster_name" {}
 
-variable "backend_bucket" {
-     type = string 
-     }
-variable "aws_region"     {
-     type = string 
-     }
+variable "container_name" {}
+variable "container_image" {}
+variable "container_port" {}
 
-variable "container_image" {
-     type = string 
-     }
-variable "container_port"  {
-     type = number 
-     }
+variable "cpu" {}
+variable "memory" {}
+variable "desired_count" {}
 
-variable "cpu"    {
-     type = number 
-     }
-variable "memory" { 
-    type = number 
-    }
+variable "task_role_arn" {}
+variable "execution_role_arn" {}
 
-variable "desired_count" {
-  type    = number
-  default = 1
-}
-
-variable "enable_exec" {
-  type    = bool
-  default = true
-}
-
-variable "container_image_garafana" {
-     type = string 
-     }
+variable "private_subnets" {}
+variable "ecs_sg_id" {}
+variable "target_group_arn" {}
+variable "aws_region" { type = string }

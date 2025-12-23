@@ -1,52 +1,43 @@
+resource "aws_ecs_task_definition" "this" {
+  family                   = "${var.project_name}-${var.environment}-${var.service_name}"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = var.cpu
+  memory                   = var.memory
+  execution_role_arn       = var.execution_role_arn
+  task_role_arn            = var.task_role_arn
 
-module "ecs" {
-  source = "../modules/ecs"
+  container_definitions = jsonencode([
+    {
+      name  = var.container_name
+      image = var.container_image
 
-  project_name   = var.project_name
-  environment    = var.environment
+      portMappings = [
+        {
+          containerPort = var.container_port
+        }
+      ]
 
-  cluster_name   = "${var.project_name}-${var.environment}"
-
-  task_role_arn      = data.terraform_remote_state.iam_ecs.outputs.task_role_arn
-  execution_role_arn = data.terraform_remote_state.iam_ecs.outputs.execution_role_arn
-
-  container_name  = var.project_name
-  container_image = var.container_image
-  container_port  = var.container_port
-
-  cpu    = var.cpu
-  memory = var.memory
-
-  desired_count = var.desired_count
-  enable_exec   = var.enable_exec
-
-  private_subnets   = data.terraform_remote_state.vpc.outputs.private_subnets
-  ecs_sg_id         = data.terraform_remote_state.sg.outputs.ecs_sg_id
-  target_group_arn = data.terraform_remote_state.alb.outputs.target_group_arn
+      essential = true
+    }
+  ])
 }
 
-module "grafana" {
-  source = "../modules/ecs"
+resource "aws_ecs_service" "this" {
+  name            = "${var.project_name}-${var.environment}-${var.service_name}"
+  cluster         = var.cluster_name
+  task_definition = aws_ecs_task_definition.this.arn
+  desired_count   = var.desired_count
+  launch_type     = "FARGATE"
 
-  project_name   = "$(var.project_name)-grafana"
-  environment    = var.environment
+  network_configuration {
+    subnets         = var.private_subnets
+    security_groups = [var.ecs_sg_id]
+  }
 
-  cluster_name   = "${var.project_name}-${var.environment}-grafana"
-
-  task_role_arn      = data.terraform_remote_state.iam_ecs.outputs.task_role_arn
-  execution_role_arn = data.terraform_remote_state.iam_ecs.outputs.execution_role_arn
-
-  container_name  = var.project_name
-  container_image = var.container_image_garafana
-  container_port  = var.container_port
-
-  cpu    = var.cpu
-  memory = var.memory
-
-  desired_count = var.desired_count
-  enable_exec   = var.enable_exec
-
-  private_subnets   = data.terraform_remote_state.vpc.outputs.private_subnets
-  ecs_sg_id         = data.terraform_remote_state.sg.outputs.ecs_sg_id
-  target_group_arn = data.terraform_remote_state.alb.outputs.target_group_arn
+  load_balancer {
+    target_group_arn = var.target_group_arn
+    container_name   = var.container_name
+    container_port   = var.container_port
+  }
 }

@@ -1,52 +1,15 @@
-variable "project_name" {
-  type = string
-}
-
-variable "environment" {
-  type = string
-}
-
-variable "vpc_id" {
-  type = string
-}
-
-variable "public_subnets" {
-  type = list(string)
-}
-
-variable "alb_sg_id" {
-  type = string
-}
-
-# variable "listener_port" {
-#   type    = number
-#   default = 80
-# }
-
-# variable "target_port" {
-#   type    = number
-#   default = 3000
-# }
-
-# variable "healthcheck_path" {
-#   type    = string
-#   default = "/health"
-# }
-
-variable "target_type" {
-  type        = string
-  description = "Target type for TG: ip (ECS/Fargate= ip) or instance (EC2= instance)"
-}
-
-variable "tags" {
-  type    = map(string)
-  default = {}
-}
+variable "project_name" {}
+variable "environment" {}
+variable "vpc_id" {}
+variable "public_subnets" {}
+variable "alb_sg_id" {}
+variable "listener_port" {}
+variable "target_type" {}
 
 variable "services" {
   type = map(object({
-    port             = number
     healthcheck_path = string
     path_pattern     = string
+    container_port   = number
   }))
 }
