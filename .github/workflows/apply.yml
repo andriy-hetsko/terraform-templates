@@ -62,7 +62,6 @@ jobs:
                 # ------------------
                 # ALB
                 # ------------------
-                listener_port:    .alb.listener_port,
                 target_port:      .alb.target_port,
                 healthcheck_path: .alb.healthcheck_path,
                 listener_port:    .alb.listener_port, 

@@ -9,7 +9,7 @@ resource "aws_ecs_task_definition" "this" {
 
   container_definitions = jsonencode([
     {
-      name  = var.container_name
+      name  = var.service_name
       image = var.container_image
 
       portMappings = [
@@ -37,7 +37,7 @@ resource "aws_ecs_service" "this" {
 
   load_balancer {
     target_group_arn = var.target_group_arn
-    container_name   = var.container_name
+    container_name   = var.service_name
     container_port   = var.container_port
   }
 }

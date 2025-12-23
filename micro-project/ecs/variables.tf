@@ -3,7 +3,7 @@ variable "environment" {}
 variable "service_name" {}
 variable "cluster_name" {}
 
-variable "container_name" {}
+# variable "container_name" {}
 variable "container_image" {}
 variable "container_port" {}
 
