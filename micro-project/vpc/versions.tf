@@ -7,3 +7,6 @@ terraform {
     }
   }
 }
+variable "aws_region" {
+  type = string
+}
