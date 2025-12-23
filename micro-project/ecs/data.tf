@@ -32,3 +32,4 @@ data "terraform_remote_state" "iam_ecs" {
     region = var.aws_region
   }
 }
+data "aws_region" "current" {}
