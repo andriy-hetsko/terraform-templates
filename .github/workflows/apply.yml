@@ -84,16 +84,14 @@ jobs:
                 (if .compute.ecs.enabled then .compute.ecs.app_port else null end),
 
                 container_port:
-                (if .compute.ecs.enabled then .compute.ecs.app_port else null end),
+                (if .compute.ecs.enabled then .compute.ecs.container_port else null end),
                 cpu:
                 (if .compute.ecs.enabled then .compute.ecs.cpu else null end),
 
                 memory:
                 (if .compute.ecs.enabled then .compute.ecs.memory else null end),
-
                 desired_count:
                 (if .compute.ecs.enabled then .compute.ecs.desired_count else null end),
-
                 enable_exec:
                 (if .compute.ecs.enabled then .compute.ecs.enable_exec else null end),
 

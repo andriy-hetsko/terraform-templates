@@ -17,6 +17,7 @@
     "ecs": {
       "enabled": true,
       "container_image": "nginx:1.25-alpine",
+      "container_port": 80, 
       "app_port": 3000,
       "cpu": 256,
       "memory": 512,
