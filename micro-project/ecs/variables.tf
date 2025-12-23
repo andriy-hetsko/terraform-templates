@@ -11,8 +11,8 @@ variable "cpu" {}
 variable "memory" {}
 variable "desired_count" {}
 
-variable "task_role_arn" {}
-variable "execution_role_arn" {}
+# variable "task_role_arn" {}
+# variable "execution_role_arn" {}
 
 variable "private_subnets" {}
 # variable "ecs_sg_id" {}
