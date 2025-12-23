@@ -22,3 +22,13 @@ variable "healthcheck_path" {
 variable "compute_type" {
   type    = string
 }
+
+
+variable "services" {
+  description = "Services exposed via ALB"
+  type = map(object({
+    container_port   = number
+    healthcheck_path = string
+    path_pattern     = string
+  }))
+}
