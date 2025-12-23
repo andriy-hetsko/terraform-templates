@@ -50,7 +50,7 @@
         "cpu": 256,
         "memory": 512,
         "desired_count": 1,
-        "healthcheck_path": "/",
+        "healthcheck_path": "/api/health",
         "path_pattern": "/grafana/*"
       }
    },

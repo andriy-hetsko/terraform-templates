@@ -24,6 +24,7 @@ data "terraform_remote_state" "alb" {
     region = var.aws_region
   }
 }
+
 data "terraform_remote_state" "iam_ecs" {
   backend = "s3"
   config = {
@@ -32,4 +33,3 @@ data "terraform_remote_state" "iam_ecs" {
     region = var.aws_region
   }
 }
-data "aws_region" "current" {}

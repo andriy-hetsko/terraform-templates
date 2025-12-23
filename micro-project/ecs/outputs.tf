@@ -13,3 +13,9 @@ output "ecs_service_arn" {
 output "ecs_log_group" {
   value = module.ecs.log_group_name
 }
+output "services" {
+  value = {
+    for k, m in module.ecs :
+    k => m.service_name
+  }
+}
