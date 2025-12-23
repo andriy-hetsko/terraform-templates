@@ -1,7 +1,3 @@
-provider "aws" {
-  region = var.aws_region
-}
-
 # ---------------------------
 # S3 bucket for Terraform state
 # ---------------------------
@@ -23,7 +19,7 @@ resource "aws_s3_bucket_versioning" "versioning" {
   }
 }
 
-# ENABLE ENCRYPTION (new syntax for AWS provider v5)
+# ENABLE ENCRYPTION 
 resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
   bucket = aws_s3_bucket.tf_state.bucket
 
