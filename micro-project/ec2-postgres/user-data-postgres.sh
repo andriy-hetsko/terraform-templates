@@ -91,6 +91,7 @@ EOF
 systemctl enable postgresql
 systemctl start postgresql
 
+
 # #!/bin/bash
 # set -e
 
