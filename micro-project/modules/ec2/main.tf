@@ -26,6 +26,7 @@ resource "aws_instance" "this" {
 }
 
   user_data = var.user_data != "" ? var.user_data : null
+  user_data_replace_on_change = true
 
   metadata_options {
     http_tokens = "required"
