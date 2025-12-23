@@ -264,8 +264,8 @@ jobs:
         working-directory: ./micro-project/ecs
         run: |
           aws s3 cp s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
-          cat terraform.tfvars.json  
-          jq '.container_image' terraform.tfvars.json 
+          cat terraform.auto.tfvars.json  
+          jq '.container_image' terraform.auto.tfvars.json
           terraform init \
             -backend-config="bucket=${PROJECT_NAME}-backend-tf" \
             -backend-config="key=${ENVIRONMENT}/ecs/terraform.tfstate" \
