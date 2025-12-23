@@ -7,7 +7,7 @@ output "ecs_service_name" {
 }
 
 output "ecs_service_arn" {
-  value = module.ecs.ecs_service_arn
+  value = module.ecs.ecs_service_id
 }
 
 output "ecs_log_group" {
