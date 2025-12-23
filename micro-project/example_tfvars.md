@@ -14,7 +14,7 @@
   },
 
     "alb": {
-    "enabled": true
+       "enabled": true
    },
 
   "services": {
@@ -44,7 +44,7 @@
 
   "compute": {
     "ecs": {
-      "enabled": true,
+      "enabled": true
     },
     "ec2": {
       "enabled": false,
