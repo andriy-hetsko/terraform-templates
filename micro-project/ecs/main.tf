@@ -1,7 +1,7 @@
 module "ecs" {
   for_each = var.services
 
-  source = "../../modules/ecs"
+  source = "../modules/ecs"
 
   project_name = var.project_name
   environment  = var.environment
