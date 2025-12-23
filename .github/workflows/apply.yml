@@ -73,7 +73,7 @@ jobs:
                 (if .compute.ec2.enabled then .compute.ec2.instance_type else null end),
                 key_name:
                 (if .compute.ec2.enabled then .compute.ec2.key_name else null end),
-                
+
                 # ------------------
                 # ECS compute
                 # ------------------
@@ -247,6 +247,8 @@ jobs:
         if: fromJson(inputs.infra_config).compute.ecs.enabled == true
         working-directory: ./micro-project/iam-ecs
         run: |
+           cat terraform.tfvars.json  \
+           jq '.container_image' terraform.tfvars.json \
            aws s3 cp \
            s3://${PROJECT_NAME}-backend-tf/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
            terraform init \
