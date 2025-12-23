@@ -5,19 +5,17 @@ resource "aws_ecs_task_definition" "this" {
   cpu                      = var.cpu
   memory                   = var.memory
 
-  execution_role_arn = data.terraform_remote_state.iam_ecs.outputs.execution_role_arn
-  task_role_arn      = data.terraform_remote_state.iam_ecs.outputs.task_role_arn
+  execution_role_arn = var.execution_role_arn
+  task_role_arn      = var.task_role_arn
 
   container_definitions = jsonencode([
     {
       name  = var.service_name
       image = var.container_image
 
-      portMappings = [
-        {
-          containerPort = var.container_port
-        }
-      ]
+      portMappings = [{
+        containerPort = var.container_port
+      }]
 
       essential = true
     }
@@ -32,8 +30,8 @@ resource "aws_ecs_service" "this" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets         = data.terraform_remote_state.vpc.outputs.private_subnets
-    security_groups = [data.terraform_remote_state.sg.outputs.ecs_sg_id]
+    subnets         = var.private_subnets
+    security_groups = [var.ecs_sg_id]
   }
 
   load_balancer {
