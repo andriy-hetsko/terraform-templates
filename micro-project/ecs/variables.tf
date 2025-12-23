@@ -35,3 +35,7 @@ variable "enable_exec" {
   type    = bool
   default = true
 }
+
+variable "container_image_garafana" {
+     type = string 
+     }

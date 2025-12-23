@@ -18,20 +18,20 @@ variable "alb_sg_id" {
   type = string
 }
 
-variable "listener_port" {
-  type    = number
-  default = 80
-}
+# variable "listener_port" {
+#   type    = number
+#   default = 80
+# }
 
-variable "target_port" {
-  type    = number
-  default = 3000
-}
+# variable "target_port" {
+#   type    = number
+#   default = 3000
+# }
 
-variable "healthcheck_path" {
-  type    = string
-  default = "/health"
-}
+# variable "healthcheck_path" {
+#   type    = string
+#   default = "/health"
+# }
 
 variable "target_type" {
   type        = string
@@ -41,4 +41,12 @@ variable "target_type" {
 variable "tags" {
   type    = map(string)
   default = {}
+}
+
+variable "services" {
+  type = map(object({
+    port             = number
+    healthcheck_path = string
+    path_pattern     = string
+  }))
 }
