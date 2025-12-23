@@ -79,6 +79,7 @@ jobs:
                 # ------------------
                 # ECS compute
                 # ------------------
+                cluster_name: (.project.name + "-" + .project.environment),
                 container_image:
                 (if .compute.ecs.enabled then .compute.ecs.container_image else null end),
                 container_image_grafana:
