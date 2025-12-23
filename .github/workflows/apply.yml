@@ -83,6 +83,8 @@ jobs:
                 app_port:
                 (if .compute.ecs.enabled then .compute.ecs.app_port else null end),
 
+                container_port:
+                (if .compute.ecs.enabled then .compute.ecs.app_port else null end),
                 cpu:
                 (if .compute.ecs.enabled then .compute.ecs.cpu else null end),
 
