@@ -12,18 +12,36 @@
     "public_subnets": ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"],
     "private_subnets": ["10.0.11.0/24", "10.0.12.0/24", "10.0.13.0/24"]
   },
-
-  "compute": {
-    "ecs": {
-      "enabled": true,
-      "container_image": "nginx:1.25-alpine",
-      "container_image_grafana": "grafana/grafana:10.4.3-ubuntu",
-      "container_port": 80, 
+    "alb": {
+    "enabled": true,
+   },
+  "services": {
+    "api": {
+      "image": "nginx:1.25-alpine",
+      "container_port": 80,
       "app_port": 80,
       "cpu": 256,
       "memory": 512,
       "desired_count": 1,
-      "enable_exec": true
+      "enable_exec": true, 
+      "healthcheck_path": "/",
+      "path_pattern": "/api/*"
+    },
+    "grafana": {
+      "image": "grafana/grafana:10.4.3",
+      "container_port": 3000,
+      "app_port": 3000,
+      "cpu": 256,
+      "memory": 512,
+      "desired_count": 1,
+      "enable_exec": true, 
+      "healthcheck_path": "/api/health",
+      "path_pattern": "/grafana/*"
+    }, 
+
+  "compute": {
+    "ecs": {
+      "enabled": true,
     },
     "ec2": {
       "enabled": false,
@@ -32,28 +50,6 @@
     }
   },
 
-  "alb": {
-    "enabled": true,
-    "services": {
-      "api": {
-        "image": "nginx:1.25-alpine",
-        "container_port": 80,
-        "cpu": 256,
-        "memory": 512,
-        "desired_count": 1,
-        "healthcheck_path": "/",
-        "path_pattern": "/api/*"
-      },
-      "grafana": {
-        "image": "grafana/grafana:10.4.3",
-        "container_port": 3000,
-        "cpu": 256,
-        "memory": 512,
-        "desired_count": 1,
-        "healthcheck_path": "/api/health",
-        "path_pattern": "/grafana/*"
-      }
-   },
   "database": {
     "rds": {
       "enabled": true,
