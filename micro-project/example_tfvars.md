@@ -12,9 +12,11 @@
     "public_subnets": ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"],
     "private_subnets": ["10.0.11.0/24", "10.0.12.0/24", "10.0.13.0/24"]
   },
+
     "alb": {
-    "enabled": true,
+    "enabled": true
    },
+
   "services": {
     "api": {
       "image": "nginx:1.25-alpine",
@@ -37,7 +39,8 @@
       "enable_exec": true, 
       "healthcheck_path": "/api/health",
       "path_pattern": "/grafana/*"
-    }, 
+    }
+  }, 
 
   "compute": {
     "ecs": {
@@ -73,4 +76,4 @@
     }
   }
 }
-}
+
