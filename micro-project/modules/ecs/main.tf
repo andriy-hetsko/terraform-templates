@@ -1,3 +1,12 @@
+resource "aws_ecs_cluster" "this" {
+  name = "${var.project_name}-${var.environment}"
+
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
+}
+
 resource "aws_ecs_task_definition" "this" {
   family                   = "${var.project_name}-${var.environment}-${var.service_name}"
   network_mode             = "awsvpc"

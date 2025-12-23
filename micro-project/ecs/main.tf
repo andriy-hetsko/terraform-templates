@@ -1,3 +1,5 @@
+
+
 module "ecs" {
   for_each = var.services
 
@@ -7,7 +9,7 @@ module "ecs" {
   environment  = var.environment
 
   service_name = each.key
-  cluster_name = var.cluster_name
+  cluster_name = aws_ecs_cluster.this.name
 
   container_image = each.value.image
   container_port  = each.value.container_port
