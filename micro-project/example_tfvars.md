@@ -1,7 +1,7 @@
 {
   "project": {
-    "name": "hetsko-json",
-    "environment": "dev",
+    "name": "hetsko-ec2",
+    "environment": "prod",
     "aws_region": "us-east-2"
   },
 
