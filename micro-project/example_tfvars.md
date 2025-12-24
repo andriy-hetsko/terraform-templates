@@ -39,7 +39,7 @@
       "desired_count": 1,
       "enable_exec": true,
       "healthcheck_path": "/",
-      "path_pattern": "/*",
+      "path_pattern": ["/*"],
       "listener_priority": 100
     },
 
@@ -52,7 +52,7 @@
       "desired_count": 1,
       "enable_exec": true,
       "healthcheck_path": "/",
-      "path_pattern": "/whoami/*", 
+      "path_pattern": ["/whoami/*"], 
       "listener_priority": 10
     }
   }, 

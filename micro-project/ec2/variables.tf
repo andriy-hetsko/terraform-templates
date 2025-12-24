@@ -23,6 +23,6 @@ variable "associate_public_ip" {
 variable "compute_type" {
   type        = string
 }
-variable "target_port" {
-  type        = number 
-}
+# variable "target_port" {
+#   type        = number 
+# }
