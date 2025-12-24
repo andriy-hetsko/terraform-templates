@@ -35,3 +35,9 @@ variable "ec2_services" {
   }))
   default = {}
 }
+variable "alb" {
+  type = object({
+    enabled = bool
+    mode    = string
+  })
+}
