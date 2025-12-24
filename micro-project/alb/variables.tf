@@ -30,5 +30,6 @@ variable "services" {
     container_port   = number
     healthcheck_path = string
     path_pattern     = string
+    listener_priority  = optional(number)
   }))
 }
