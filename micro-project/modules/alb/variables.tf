@@ -11,5 +11,6 @@ variable "services" {
     healthcheck_path = string
     path_pattern     = string
     container_port   = number
+    listener_priority  = number
   }))
 }
