@@ -1,6 +1,6 @@
 {
   "project": {
-    "name": "hetsko-ecs-new",
+    "name": "hetsko-ec2-new",
     "environment": "dev",
     "aws_region": "us-east-2"
   },
@@ -13,11 +13,23 @@
     "private_subnets": ["10.0.11.0/24", "10.0.12.0/24", "10.0.13.0/24"]
   },
 
-    "alb": {
-       "enabled": true
-   },
+  "compute": {
+    "ecs": {
+      "enabled": false
+    },
+    "ec2": {
+      "enabled": true,
+      "instance_type": "t3.micro",
+      "key_name": null, 
+    }    
+  },
 
-  "services": {
+  "alb": {
+    "enabled": true,
+    "mode": "ecs"   // ecs | ec2
+  }
+
+  "ecs_services": {
     "frontend": {
       "image": "nginx:1.25-alpine",
       "container_port": 80,
@@ -44,21 +56,25 @@
       "listener_priority": 10
     }
   }, 
-
-  "compute": {
-    "ecs": {
-      "enabled": true
+  "ec2_services": {
+    "api": {
+      "target_port": 3000,
+      "healthcheck_path": "/",
+      "path_patterns": ["/api", "/api/*"],
+      "listener_priority": 10
     },
-    "ec2": {
-      "enabled": false,
-      "instance_type": "t3.micro",
-      "key_name": null
+
+    "grafana": {
+      "target_port": 3000,
+      "healthcheck_path": "/",
+      "path_patterns": ["/grafana", "/grafana/*"],
+      "listener_priority": 20
     }
-  },
+  }, 
 
   "database": {
     "rds": {
-      "enabled": true,
+      "enabled": false,
       "engine": "postgres",
       "engine_version": "17.2",
       "db_name": "appdb",
@@ -72,7 +88,7 @@
       "deletion_protection": false
     },
     "ec2": {
-      "enabled": false,
+      "enabled": true,
       "engine": "postgres",
       "instance_type": "t3.micro",
       "volume_size": 50
