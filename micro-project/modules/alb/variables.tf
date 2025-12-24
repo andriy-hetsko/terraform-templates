@@ -4,7 +4,6 @@ variable "vpc_id" {}
 variable "public_subnets" {}
 variable "alb_sg_id" {}
 variable "listener_port" {}
-variable "listener_priority" {}
 variable "target_type" {}
 
 variable "services" {

@@ -27,8 +27,8 @@
       "desired_count": 1,
       "enable_exec": true,
       "healthcheck_path": "/",
-      "path_pattern": "/*"
-      "listener_priority": 100,
+      "path_pattern": "/*",
+      "listener_priority": 100
     },
 
     "api": {
@@ -57,8 +57,8 @@
       "desired_count": 1,
       "enable_exec": true,
       "healthcheck_path": "/",
-      "path_pattern": "/whoami/*"
-      "listener_priority": 10,
+      "path_pattern": "/whoami/*", 
+      "listener_priority": 10
     }
   }, 
 
