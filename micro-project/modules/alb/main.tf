@@ -61,6 +61,11 @@ resource "aws_lb_listener" "http" {
 
 resource "aws_lb_target_group" "ecs" {
   for_each = var.alb.enabled && var.alb.mode == "ecs" ? var.ecs_services : {}
+  name = substr(
+    "${var.project_name}-${var.environment}-ecs-${each.key}",
+    0,
+    32
+  )
 
   port        = each.value.container_port
   protocol    = "HTTP"
@@ -74,6 +79,11 @@ resource "aws_lb_target_group" "ecs" {
 
 resource "aws_lb_target_group" "ec2" {
   for_each = var.alb.enabled && var.alb.mode == "ec2" ? var.ec2_services : {}
+  name = substr(
+    "${var.project_name}-${var.environment}-ec2-${each.key}",
+    0,
+    32
+  )
 
   port        = each.value.target_port
   protocol    = "HTTP"
