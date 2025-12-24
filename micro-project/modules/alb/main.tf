@@ -95,9 +95,26 @@ resource "aws_lb_listener_rule" "ecs" {
       values = each.value.path_patterns
     }
   }
-
   action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.ecs[each.key].arn
+  }
+}
+
+resource "aws_lb_listener_rule" "ec2" {
+  for_each = var.alb.enabled && var.alb.mode == "ec2" ? var.ec2_services : {}
+
+  listener_arn = aws_lb_listener.http[0].arn
+  priority     = each.value.listener_priority
+
+  condition {
+    path_pattern {
+      values = each.value.path_patterns
+    }
+  }
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.ec2[each.key].arn
   }
 }
