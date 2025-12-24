@@ -44,5 +44,5 @@ resource "aws_lb_target_group_attachment" "ec2" {
 
   target_group_arn = data.terraform_remote_state.alb.outputs.target_group_arn
   target_id        = module.ec2.instance_id
-  port             = var.target_port
+  port             = each.value.target_port
 }
