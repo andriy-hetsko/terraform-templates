@@ -39,7 +39,9 @@ resource "aws_lb_listener_rule" "this" {
   for_each = var.services
 
   listener_arn = aws_lb_listener.http.arn
-  priority     = each.value.listener_priority
+  priority = coalesce( each.value.listener_priority,
+    100 + index(sort(keys(var.services)), each.key)
+  )
 
 
   condition {
