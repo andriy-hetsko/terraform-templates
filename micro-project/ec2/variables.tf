@@ -26,3 +26,12 @@ variable "compute_type" {
 # variable "target_port" {
 #   type        = number 
 # }
+variable "ec2_services" {
+  type    = map(object({
+    target_port       = number
+    healthcheck_path  = string
+    path_patterns     = list(string)
+    listener_priority = number
+  }))
+  default = {}
+}
