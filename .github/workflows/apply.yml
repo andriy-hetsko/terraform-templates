@@ -68,6 +68,10 @@ jobs:
               listener_port:    .alb.listener_port, 
               services:         .services, 
 
+              alb: .alb,
+              ecs_services: .ecs_services,
+              ec2_services: .ec2_services,
+
               # ------------------
               # EC2 compute
               # ------------------
