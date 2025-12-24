@@ -20,14 +20,14 @@
     "ec2": {
       "enabled": true,
       "instance_type": "t3.micro",
-      "key_name": null, 
+      "key_name": null
     }    
   },
 
   "alb": {
     "enabled": true,
-    "mode": "ecs"   // ecs | ec2
-  }
+    "mode": "ec2"  
+  }, 
 
   "ecs_services": {
     "frontend": {

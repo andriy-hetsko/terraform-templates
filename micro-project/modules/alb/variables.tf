@@ -15,14 +15,20 @@ variable "target_type" {}
 #   }))
 # }
 
-variable "mode" {
-  type = string
-  validation {
-    condition     = contains(["ecs", "ec2"], var.mode)
-    error_message = "alb.mode must be ecs or ec2"
-  }
-}
+# variable "mode" {
+#   type = string
+#   validation {
+#     condition     = contains(["ecs", "ec2"], var.mode)
+#     error_message = "alb.mode must be ecs or ec2"
+#   }
+# }
 
+variable "alb" {
+  type = object({
+    enabled = bool
+    mode    = string
+  })
+}
 variable "ecs_services" {
   type    = map(object({
     image             = string
