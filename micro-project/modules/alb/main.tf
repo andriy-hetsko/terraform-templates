@@ -9,7 +9,7 @@ resource "aws_lb" "this" {
 resource "aws_lb_listener" "http" {
   count = var.alb.enabled ? 1 : 0
 
-  load_balancer_arn = aws_lb.this.arn
+  load_balancer_arn = aws_lb.this[0].arn
   port              = 80
   protocol          = "HTTP"
 
@@ -85,9 +85,9 @@ resource "aws_lb_target_group" "ec2" {
   }
 }
 resource "aws_lb_listener_rule" "ecs" {
-  for_each = var.alb.mode == "ecs" ? var.ecs_services : {}
+  for_each = var.alb.enabled && var.alb.mode == "ecs" ? var.ecs_services : {}
 
-  listener_arn = aws_lb_listener.http.arn
+  listener_arn = aws_lb_listener.http[0].arn
   priority     = each.value.listener_priority
 
   condition {
