@@ -1,13 +1,16 @@
 resource "aws_lb" "this" {
+  count = var.alb.enabled ? 1 : 0
+
   name               = "${var.project_name}-${var.environment}-alb"
   load_balancer_type = "application"
   security_groups    = [var.alb_sg_id]
   subnets            = var.public_subnets
 }
-
 resource "aws_lb_listener" "http" {
+  count = var.alb.enabled ? 1 : 0
+
   load_balancer_arn = aws_lb.this.arn
-  port              = var.listener_port
+  port              = 80
   protocol          = "HTTP"
 
   default_action {
@@ -57,7 +60,7 @@ resource "aws_lb_listener" "http" {
 # }
 
 resource "aws_lb_target_group" "ecs" {
-  for_each = var.mode == "ecs" ? var.ecs_services : {}
+  for_each = var.alb.enabled && var.alb.mode == "ecs" ? var.ecs_services : {}
 
   port        = each.value.container_port
   protocol    = "HTTP"
@@ -70,7 +73,7 @@ resource "aws_lb_target_group" "ecs" {
 }
 
 resource "aws_lb_target_group" "ec2" {
-  for_each = var.mode == "ec2" ? var.ec2_services : {}
+  for_each = var.alb.enabled && var.alb.mode == "ec2" ? var.ec2_services : {}
 
   port        = each.value.target_port
   protocol    = "HTTP"
@@ -82,7 +85,7 @@ resource "aws_lb_target_group" "ec2" {
   }
 }
 resource "aws_lb_listener_rule" "ecs" {
-  for_each = var.mode == "ecs" ? var.ecs_services : {}
+  for_each = var.alb.mode == "ecs" ? var.ecs_services : {}
 
   listener_arn = aws_lb_listener.http.arn
   priority     = each.value.listener_priority
