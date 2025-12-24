@@ -6,7 +6,7 @@
 module "alb" {
   source = "../modules/alb"
 
-  mode = var.alb.mode
+  alb = var.alb
 
   ecs_services = var.alb.mode == "ecs" ? var.ecs_services : {}
   ec2_services = var.alb.mode == "ec2" ? var.ec2_services : {}
