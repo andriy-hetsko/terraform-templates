@@ -18,27 +18,47 @@
    },
 
   "services": {
-    "api": {
+    "frontend": {
       "image": "nginx:1.25-alpine",
       "container_port": 80,
       "app_port": 80,
       "cpu": 256,
       "memory": 512,
       "desired_count": 1,
-      "enable_exec": true, 
+      "enable_exec": true,
       "healthcheck_path": "/",
-      "path_pattern": "/api/*"
+      "path_pattern": "/*"
+      "listener_priority": 100,
     },
-    "grafana": {
-      "image": "grafana/grafana:10.4.3",
-      "container_port": 3000,
-      "app_port": 3000,
+
+    "api": {
+      "image": "hashicorp/http-echo:0.2.3",
+      "container_port": 5678,
+      "app_port": 5678,
       "cpu": 256,
       "memory": 512,
       "desired_count": 1,
-      "enable_exec": true, 
-      "healthcheck_path": "/api/health",
-      "path_pattern": "/grafana/*"
+      "enable_exec": true,
+      "healthcheck_path": "/health",
+      "path_pattern": "/api/*",
+      "listener_priority": 20,
+      "command": [
+        "-listen", ":5678",
+        "-text", "api works"
+      ]
+    },
+
+    "whoami": {
+      "image": "containous/whoami:v1.5.0",
+      "container_port": 80,
+      "app_port": 80,
+      "cpu": 256,
+      "memory": 512,
+      "desired_count": 1,
+      "enable_exec": true,
+      "healthcheck_path": "/",
+      "path_pattern": "/whoami/*"
+      "listener_priority": 10,
     }
   }, 
 

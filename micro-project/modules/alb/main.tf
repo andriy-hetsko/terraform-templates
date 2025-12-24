@@ -39,7 +39,8 @@ resource "aws_lb_listener_rule" "this" {
   for_each = var.services
 
   listener_arn = aws_lb_listener.http.arn
-  priority     = 10 + index(keys(var.services), each.key)
+  priority     = each.value.listener_priority
+
 
   condition {
     path_pattern {
