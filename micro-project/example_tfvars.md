@@ -57,20 +57,40 @@
     }
   }, 
   "ec2_services": {
-    "api": {
+  "api": {
+    "instance": {
+      "instance_type": "t3.small",
+      "root_volume": {
+        "size": 20,
+        "type": "gp3"
+      },
+      "user_data_file": "user-data-api.sh"
+    },
+    "alb": {
       "target_port": 3000,
       "healthcheck_path": "/",
       "path_patterns": ["/api", "/api/*"],
       "listener_priority": 10
-    },
+    }
+  },
 
-    "grafana": {
+  "grafana": {
+    "instance": {
+      "instance_type": "t3.medium",
+      "root_volume": {
+        "size": 50,
+        "type": "gp3"
+      },
+      "user_data_file": "user-data-grafana.sh"
+    },
+    "alb": {
       "target_port": 3000,
       "healthcheck_path": "/",
       "path_patterns": ["/grafana", "/grafana/*"],
       "listener_priority": 20
     }
-  }, 
+  }
+}, 
 
   "database": {
     "rds": {

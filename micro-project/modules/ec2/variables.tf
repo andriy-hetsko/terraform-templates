@@ -64,3 +64,11 @@ variable "role" {
   description = "Logical role of EC2 instance (postgres17, app etc)"
   type        = string
 }
+variable "name" {
+  type = string
+}
+
+variable "tags" {
+  type    = map(string)
+  default = {}
+}
