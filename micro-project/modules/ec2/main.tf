@@ -1,19 +1,3 @@
-# resource "aws_instance" "this" {
-#   ami                    = data.aws_ami.this.id
-#   instance_type          = var.instance_type
-#   subnet_id              = var.subnet_id
-#   vpc_security_group_ids = var.security_group_ids
-
-#   iam_instance_profile = var.iam_instance_profile
-#   associate_public_ip_address = var.associate_public_ip
-  
-#   tags = merge(
-#     var.tags,
-#     {
-#       Name = var.name
-#     }
-#   )
-# }
 resource "aws_instance" "this" {
   ami           = data.aws_ami.this.id
   instance_type = var.instance_type

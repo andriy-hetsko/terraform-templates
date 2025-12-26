@@ -125,19 +125,6 @@ variable "tags" {
   type    = map(string)
   default = {}
 }
-
-# variable "compute" {
-#   type = object({
-#     ecs = object({
-#       enabled = bool
-#     })
-#     ec2 = object({
-#       enabled        = bool
-#       instance_type  = optional(string)
-#       key_name       = optional(string)
-#     })
-#   })
-# }
 variable "compute" {
   type = object({
     ecs = object({ enabled = bool })
