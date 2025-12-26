@@ -4,6 +4,7 @@ module "postgres_ec2" {
   project_name = var.project_name
   environment  = var.environment
   role        = "postgres17"
+  name = "postgres17"
 
   ami_settings = {
     ami_type       = "ubuntu"
