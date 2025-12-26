@@ -130,5 +130,5 @@ resource "aws_lb_target_group_attachment" "ec2" {
 
   target_group_arn = module.alb.target_group_arns[each.key]
   target_id        = module.ec2[each.key].instance_id
-  port             = each.value.target_port
+  port             = each.value.alb.target_port
 }
