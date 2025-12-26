@@ -64,8 +64,8 @@
         "size": 20,
         "type": "gp3"
       },
-      data_volume = {
-        enabled = false
+      "data_volume" = {
+        "enabled" = false
       }, 
       "user_data_file": "user-data.sh"
     },
@@ -83,9 +83,9 @@
         "size": 50,
         "type": "gp3"
       },
-      data_volume = {
-        enabled = true
-      }
+      "data_volume" = {
+        "enabled" = false
+      }, 
       "user_data_file": "user-data-graf.sh"
     },
     "alb": {
