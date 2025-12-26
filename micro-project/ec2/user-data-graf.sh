@@ -15,5 +15,6 @@ systemctl start amazon-ssm-agent || true
 
 #test, start nginx
 docker run -p 3000:80 -d nginx
-cd 
+ll
 mkdir grafana
+ll

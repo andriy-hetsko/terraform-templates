@@ -65,7 +65,10 @@
         "type": "gp3"
       },
       "data_volume": {
-        "enabled": false
+        "enabled": false, 
+        "device":  "/dev/sdf", 
+        "size":  100, 
+        "type":  "gp3"
       }, 
       "user_data_file": "user-data.sh"
     },
@@ -84,7 +87,10 @@
         "type": "gp3"
       },
       "data_volume": {
-        "enabled": false
+        "enabled": false, 
+        "device":  "/dev/sdf", 
+        "size":  100, 
+        "type":  "gp3"
       }, 
       "user_data_file": "user-data-graf.sh"
     },
