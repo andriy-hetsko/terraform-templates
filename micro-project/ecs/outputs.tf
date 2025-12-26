@@ -1,5 +1,9 @@
-output "ecs_cluster_name" {
-  value = module.ecs.ecs_cluster_name
+output "ecs_cluster_names" {
+  description = "ECS cluster names"
+  value = {
+    for k, m in module.ecs :
+    k => m.ecs_cluster_name
+  }
 }
 output "ecs_services" {
   description = "ECS services created per service"
