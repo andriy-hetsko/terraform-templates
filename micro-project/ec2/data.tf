@@ -32,3 +32,4 @@ data "terraform_remote_state" "alb" {
     region = var.aws_region
   }
 }
+

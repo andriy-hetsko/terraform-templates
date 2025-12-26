@@ -128,7 +128,7 @@ module "ec2" {
 resource "aws_lb_target_group_attachment" "ec2" {
   for_each = var.alb.enabled && var.alb.mode == "ec2" ? var.ec2_services : {}
 
-  target_group_arn = module.alb.target_group_arns[each.key]
+  target_group_arn = data.terraform_remote_state.alb.outputs.target_group_arns[each.key]
   target_id        = module.ec2[each.key].instance_id
   port             = each.value.alb.target_port
 }
