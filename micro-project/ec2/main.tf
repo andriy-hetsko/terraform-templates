@@ -68,10 +68,11 @@ module "ec2" {
 
   associate_public_ip = false
 
-  root_volume = {
-    size = each.value.root_volume_size
-    type = "gp3"
-  }
+  # root_volume = {
+  #   size = each.value.root_volume_size
+  #   type = "gp3"
+  # }
+  root_volume = each.value.instance.root_volume
 
   data_volume = lookup(each.value, "data_volume", {
     enabled = false

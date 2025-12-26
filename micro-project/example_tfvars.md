@@ -64,6 +64,9 @@
         "size": 20,
         "type": "gp3"
       },
+      data_volume = {
+        enabled = false
+      }, 
       "user_data_file": "user-data.sh"
     },
     "alb": {
@@ -73,7 +76,6 @@
       "listener_priority": 10
     }
   },
-
   "grafana": {
     "instance": {
       "instance_type": "t3.medium",
@@ -81,6 +83,9 @@
         "size": 50,
         "type": "gp3"
       },
+      data_volume = {
+        enabled = true
+      }
       "user_data_file": "user-data-graf.sh"
     },
     "alb": {
