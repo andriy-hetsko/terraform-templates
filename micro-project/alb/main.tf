@@ -21,6 +21,7 @@
 #   # target_type   = local.alb_target_type
 #   # services      = var.services
 # }
+
 module "alb" {
   source = "../modules/alb"
 
@@ -39,4 +40,3 @@ module "alb" {
     name => svc.alb
   } : {}
 }
-
