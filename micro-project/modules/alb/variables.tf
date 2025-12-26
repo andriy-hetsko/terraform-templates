@@ -44,12 +44,43 @@ variable "ecs_services" {
   default = {}
 }
 
+# variable "ec2_services" {
+#   type    = map(object({
+#     target_port       = number
+#     healthcheck_path  = string
+#     path_patterns     = list(string)
+#     listener_priority = number
+#   }))
+#   default = {}
+# }
 variable "ec2_services" {
-  type    = map(object({
-    target_port       = number
-    healthcheck_path  = string
-    path_patterns     = list(string)
-    listener_priority = number
+  type = map(object({
+    instance = object({
+      instance_type  = string
+      user_data_file = string
+
+      root_volume = object({
+        size = number
+        type = string
+        iops = optional(number)
+        throughput = optional(number)
+      })
+
+      data_volume = optional(object({
+        enabled = bool
+        size    = number
+        type    = string
+        device  = string
+        iops    = optional(number)
+        throughput = optional(number)
+      }))
+    })
+
+    alb = object({
+      target_port       = number
+      healthcheck_path  = string
+      path_patterns     = list(string)
+      listener_priority = number
+    })
   }))
-  default = {}
 }

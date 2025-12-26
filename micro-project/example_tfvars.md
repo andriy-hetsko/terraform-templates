@@ -64,7 +64,7 @@
         "size": 20,
         "type": "gp3"
       },
-      "user_data_file": "user-data-api.sh"
+      "user_data_file": "user-data.sh"
     },
     "alb": {
       "target_port": 3000,
@@ -81,7 +81,7 @@
         "size": 50,
         "type": "gp3"
       },
-      "user_data_file": "user-data-grafana.sh"
+      "user_data_file": "user-data-graf.sh"
     },
     "alb": {
       "target_port": 3000,
@@ -115,4 +115,3 @@
     }
   }
 }
-
