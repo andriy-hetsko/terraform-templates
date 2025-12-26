@@ -1,6 +1,13 @@
-variable "project_name" {}
-variable "environment" {}
-
+variable "project_name" {
+  type = string
+}
+variable "environment" {
+  type = string
+}
+variable "name" {
+  type        = string
+  description = "Logical service name (api, grafana, etc)"
+}
 variable "ami_settings" {
   type = object({
     ami_type       = string
@@ -24,9 +31,13 @@ variable "data_volume" {
     enabled = false
   }
 }
+variable "instance_type" {
+  type = string
+}
 
-variable "instance_type" {}
-variable "subnet_id" {}
+variable "subnet_id" {
+  type = string
+}
 variable "security_group_ids" {
   type = list(string)
 }
@@ -63,12 +74,4 @@ variable "tags" {
 variable "role" {
   description = "Logical role of EC2 instance (postgres17, app etc)"
   type        = string
-}
-variable "name" {
-  type = string
-}
-
-variable "tags" {
-  type    = map(string)
-  default = {}
 }

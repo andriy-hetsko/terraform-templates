@@ -33,5 +33,6 @@ locals {
     Project     = var.project_name
     Environment = var.environment
     Role        = var.role
+    ManagedBy   = "terraform"
   }, var.tags)
 }

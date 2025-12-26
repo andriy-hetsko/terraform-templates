@@ -24,14 +24,7 @@ resource "aws_instance" "this" {
   associate_public_ip_address = var.associate_public_ip
 
   user_data = var.user_data
-
-  root_block_device {
-    volume_size = var.root_volume.size
-    volume_type = var.root_volume.type
-  }
-
-  tags = var.tags
-}
+  user_data_replace_on_change = true
 
   root_block_device {
     volume_size = var.root_volume.size
@@ -41,18 +34,15 @@ resource "aws_instance" "this" {
   }
 
   dynamic "ebs_block_device" {
-  for_each = var.data_volume.enabled ? [1] : []
-  content {
-    device_name = var.data_volume.device
-    volume_size = var.data_volume.size
-    volume_type = var.data_volume.type
-    iops        = try(var.data_volume.iops, null)
-    throughput  = try(var.data_volume.throughput, null)
+    for_each = var.data_volume.enabled ? [1] : []
+    content {
+      device_name = var.data_volume.device
+      volume_size = var.data_volume.size
+      volume_type = var.data_volume.type
+      iops        = try(var.data_volume.iops, null)
+      throughput  = try(var.data_volume.throughput, null)
+    }
   }
-}
-
-  user_data = var.user_data != "" ? var.user_data : null
-  user_data_replace_on_change = true
 
   metadata_options {
     http_tokens = "required"
@@ -62,8 +52,10 @@ resource "aws_instance" "this" {
     ignore_changes = [ami]
   }
 
-  tags = local.tags
+  tags = merge(
+    local.tags,
+    {
+      Name = "${var.project_name}-${var.environment}-${var.name}"
+    }
+  )
 }
-
-
-
