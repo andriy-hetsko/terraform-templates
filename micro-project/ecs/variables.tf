@@ -15,7 +15,7 @@ variable "ecs_services" {
     desired_count     = number
     enable_exec       = bool
     healthcheck_path  = string
-    path_patterns      = string
+    path_patterns      = list(string)
     listener_priority = number
   }))
 }
