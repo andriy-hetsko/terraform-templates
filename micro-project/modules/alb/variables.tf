@@ -15,13 +15,13 @@ variable "alb_sg_id" {}
 #   }))
 # }
 
-variable "mode" {
-  type = string
-  validation {
-    condition     = contains(["ecs", "ec2"], var.mode)
-    error_message = "alb.mode must be ecs or ec2"
-  }
-}
+# variable "mode" {
+#   type = string
+#   validation {
+#     condition     = contains(["ecs", "ec2"], var.mode)
+#     error_message = "alb.mode must be ecs or ec2"
+#   }
+# }
 
 variable "alb" {
   type = object({
