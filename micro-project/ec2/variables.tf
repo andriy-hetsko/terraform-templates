@@ -35,36 +35,69 @@ variable "compute_type" {
 #   }))
 #   default = {}
 # }
+# variable "ec2_services" {
+#   type = map(object({
+#     instance_type      = optional(string)
+#     associate_public_ip = optional(bool)
+
+#     root_volume = object({
+#       size       = number
+#       type       = optional(string)
+#       iops       = optional(number)
+#       throughput = optional(number)
+#     })
+
+#     data_volume = optional(object({
+#       enabled    = bool
+#       device     = string
+#       size       = number
+#       type       = string
+#       iops       = optional(number)
+#       throughput = optional(number)
+#     }))
+
+#     user_data_file = string
+
+#     target_port       = number
+#     healthcheck_path  = string
+#     path_patterns     = list(string)
+#     listener_priority = number
+#   }))
+#   default = {}
+# }
 variable "ec2_services" {
   type = map(object({
-    instance_type      = optional(string)
-    associate_public_ip = optional(bool)
+    instance = object({
+      instance_type = string
 
-    root_volume = object({
-      size       = number
-      type       = optional(string)
-      iops       = optional(number)
-      throughput = optional(number)
+      root_volume = object({
+        size       = number
+        type       = string
+        iops       = optional(number)
+        throughput = optional(number)
+      })
+
+      data_volume = optional(object({
+        enabled    = bool
+        device     = optional(string)
+        size       = optional(number)
+        type       = optional(string)
+        iops       = optional(number)
+        throughput = optional(number)
+      }))
+
+      user_data_file = string
     })
 
-    data_volume = optional(object({
-      enabled    = bool
-      device     = string
-      size       = number
-      type       = string
-      iops       = optional(number)
-      throughput = optional(number)
-    }))
-
-    user_data_file = string
-
-    target_port       = number
-    healthcheck_path  = string
-    path_patterns     = list(string)
-    listener_priority = number
+    alb = object({
+      target_port       = number
+      healthcheck_path  = string
+      path_patterns     = list(string)
+      listener_priority = number
+    })
   }))
-  default = {}
 }
+
 
 # variable "alb" {
 #   type = object({
