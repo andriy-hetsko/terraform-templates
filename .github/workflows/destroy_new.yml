@@ -118,34 +118,34 @@ jobs:
                 terraform destroy -auto-approve 
 
 
-# -------------------------------------------
-#  DESYTROY EC2
-# -------------------------------------------
-            - name: Check if EC2 state exists
-              id: ec2_state
-              run: |
-                if aws s3 ls s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/ec2/terraform.tfstate >/dev/null 2>&1; then
-                    echo "exists=true" >> $GITHUB_OUTPUT
-                else
-                    echo "exists=false" >> $GITHUB_OUTPUT
-                fi
+# # -------------------------------------------
+# #  DESYTROY EC2
+# # -------------------------------------------
+#             - name: Check if EC2 state exists
+#               id: ec2_state
+#               run: |
+#                 if aws s3 ls s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/ec2/terraform.tfstate >/dev/null 2>&1; then
+#                     echo "exists=true" >> $GITHUB_OUTPUT
+#                 else
+#                     echo "exists=false" >> $GITHUB_OUTPUT
+#                 fi
 
-            - name: Download tfvars from S3
-              if: steps.ec2_state.outputs.exists == 'true'
-              working-directory: ./micro-project/ec2
-              run: |
-                aws s3 cp \
-                    s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
-            - name: Destroy EC2 (with backend config)
-              if: steps.ec2_state.outputs.exists == 'true'
-              working-directory: ./micro-project/ec2
-              run: |
-                terraform init \
-                    -backend-config="bucket=${BUCKET_NAME_BACKEND}" \
-                    -backend-config="key=${ENVIRONMENT}/ec2/terraform.tfstate" \
-                    -backend-config="region=${AWS_REGION}" \
-                    -backend-config="encrypt=true"
-                terraform destroy -auto-approve 
+#             - name: Download tfvars from S3
+#               if: steps.ec2_state.outputs.exists == 'true'
+#               working-directory: ./micro-project/ec2
+#               run: |
+#                 aws s3 cp \
+#                     s3://${BUCKET_NAME_BACKEND}/${ENVIRONMENT}/terraform.tfvars.json terraform.auto.tfvars.json
+#             - name: Destroy EC2 (with backend config)
+#               if: steps.ec2_state.outputs.exists == 'true'
+#               working-directory: ./micro-project/ec2
+#               run: |
+#                 terraform init \
+#                     -backend-config="bucket=${BUCKET_NAME_BACKEND}" \
+#                     -backend-config="key=${ENVIRONMENT}/ec2/terraform.tfstate" \
+#                     -backend-config="region=${AWS_REGION}" \
+#                     -backend-config="encrypt=true"
+#                 terraform destroy -auto-approve 
 
 
 
