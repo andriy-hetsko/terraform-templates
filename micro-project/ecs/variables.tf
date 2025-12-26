@@ -6,7 +6,7 @@ variable "environment" { type = string }
 variable "backend_bucket" { type = string }
 variable "aws_region" { type = string }
 
-variable "services" {
+variable "ecs_services" {
   type = map(object({
     image             = string
     container_port    = number

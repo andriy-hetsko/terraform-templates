@@ -9,7 +9,7 @@ resource "aws_ecs_cluster" "this" {
 }
 
 module "ecs" {
-  for_each = var.services
+  for_each = var.ecs_services
 
   source = "../modules/ecs"
 
